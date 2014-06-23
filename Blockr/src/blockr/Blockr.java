@@ -2,6 +2,7 @@ package blockr;
 
 import processing.core.PApplet;
 import processing.core.PImage;
+import processing.core.PVector;
 import processing.video.Capture;
 
 
@@ -20,6 +21,8 @@ public class Blockr extends PApplet {
 	//----------------------------------
 	Capture cam;
 	float meR,meG,meB;
+	static float menowX = 0.0f;
+	static float menowY = 0.0f;
 	
 	// ***Background
 	//----------------------------------
@@ -28,6 +31,14 @@ public class Blockr extends PApplet {
 	// ***Shield Setup
 	//----------------------------------
 	Shield sh = new Shield();
+	
+	// ***Me Setup
+	//----------------------------------
+	PVector mePos;
+	PVector meDir;
+	float meAccel = 0.5f;
+	float meSpeed = 0.2f;
+	float meStartX, meStartY;
 	
 
 	public void setup() {
@@ -52,6 +63,14 @@ public class Blockr extends PApplet {
 		
 		cam.start();
 		
+		// ***Me Setup
+		//----------------------------------
+		meStartX = width/2;
+		meStartY = height/2;
+		
+		mePos = new PVector(meStartX, meStartY);
+		meDir = new PVector(menowX, menowY);
+		
 		//----------------------------------
 		  
 	}
@@ -70,6 +89,14 @@ public class Blockr extends PApplet {
 		//sh.decelerate();
 		//sh.make();
 		
+		// ***Me
+		//----------------------------------
+		meDir = new PVector(menowX, menowY);
+		meDir.sub(mePos);
+		//meDir.normalize();
+		PVector move = PVector.mult(meDir, meSpeed);
+		mePos.add(move);
+		
 		// ***Camera
 		//----------------------------------
 		
@@ -78,26 +105,31 @@ public class Blockr extends PApplet {
 			//image(cam, 0, 0);
 			
 			fill(255);
+			float meY = meStartY;
+			float meX = meStartX;
+			
 			
 			int[] pixs = cam.pixels;
 			
 			float closestToColor = 100;
-			int x = 0;
-			int y = 0;
 			
 			for(int i = 0; i < pixs.length; i++){
 				int color = pixs[i];
 				
 				if(dist(meR, meG, meB, red(color), green(color), blue(color)) < closestToColor){
+					
 					closestToColor = dist(meR, meG, meB, red(color), green(color), blue(color));
 					
-					y = i/cam.width;
-					x = i%cam.width;
+					meY = i/cam.width;
+					meX = i%cam.width;
+					
+					menowX = meX;
+					menowY = meY;
 				}
 			}
-			
-			ellipse(x, y, 50, 50);
 		}
+		
+		ellipse(mePos.x, mePos.y, 50, 50);
 	}
 	
 	public static void main(String _args[]) {
