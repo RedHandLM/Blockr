@@ -58,6 +58,8 @@ public class Blockr extends PApplet {
 	float aAlpha3 = 100;
 	float aDist3 = 0;
 	
+	int angleOfShape;
+	
 	// ***Me Variables
 	//----------------------------------
 	PVector mePos;
@@ -201,9 +203,18 @@ public class Blockr extends PApplet {
 		ellipse(mePos.x, mePos.y, 50, 50);
 		
 		noFill();
+		
+		pushMatrix();
+		translate(mePos.x, mePos.y);
+		rotate(PApplet.radians(angleOfShape));
 		strokeWeight(21-((aDist1/PI)*20));
 		stroke(aRed1, aGreen1, aBlue1, aAlpha1);
 		arc(mePos.x, mePos.y, 200.0f, 200.0f, PI-aDist1, PI+aDist1);
+		popMatrix();
+		
+		//PUT KNOB INFO HERE
+		angleOfShape +=1;
+		
 		/*
 		strokeWeight(aWeight2);
 		stroke(aRed2, aGreen2, aBlue2, aAlpha2);
@@ -302,6 +313,7 @@ public class Blockr extends PApplet {
 		
 		void render() {
 			fill(255);
+			noStroke();
 			ellipse (bX, bY, bR*2, bR*2);
 		}
 	}
