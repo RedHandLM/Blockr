@@ -76,7 +76,7 @@ public class Blockr extends PApplet {
 	
 	// ***Bullet Variables
 	//----------------------------------
-	Bullet bull = new Bullet(200,200,200);
+	Bullet bull = new Bullet(200,200,50);
 	
 
 	public void setup() {
@@ -155,17 +155,14 @@ public class Blockr extends PApplet {
 		
 		// ***Enemy
 		//----------------------------------
-		noStroke();
-		//fill(255);
-		//ellipse(bulletPos.x,bulletPos.y,10,10);
-		//bulletPos.x++;
-				
-		if (dist(mePos.x, mePos.y, bull.bX, bull.bY) < bull.bR + meRad){
+		//CHECK COLLISION
+		if (dist(mePos.x, mePos.y, bull.bX, bull.bY) < bull.bR/2 + meRad){
 			meC = 0;
 		} else {
 			meC = 255;
 		}
 		
+		//MAKE BULLET
 		bull.render();
 		
 		// ***Camera
@@ -199,7 +196,7 @@ public class Blockr extends PApplet {
 				}
 			}
 		}
-		fill(255);
+		fill(meC);
 		noStroke();
 		ellipse(mePos.x, mePos.y, 50, 50);
 		
@@ -290,6 +287,7 @@ public class Blockr extends PApplet {
 	
 //CLASSES
 	
+	//Bullet Class
 	class Bullet {
 		float bX;
 		float bY;
