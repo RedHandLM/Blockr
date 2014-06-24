@@ -1,41 +1,25 @@
 package blockr;
 
 import processing.core.PApplet;
+import processing.core.PVector;
 
 public class Shield extends ProcessingObject {
-	float xPos;
-	float yPos;
-	float speedX;
-	float speedY;
-	float xLoc;
 	
-	public void setup() {
-		xPos = p.width / 2;
-		yPos = p.width / 2;
-		speedX = 0;
-	    speedY = 0;
-	    xLoc = p.random(50, p.height/2);
-	}
-	public void draw() {
-	    xPos = xPos - p.pmouseX/300 + speedX;
-	    yPos = yPos - p.pmouseY/300 + speedY;
+	public PVector shieldPos;
+	public float shieldW, shieldH;
+	public int shieldCol;
+	
+	public Shield(PVector pos, float w, float h, int color) {
+		super();
+		this.shieldPos = pos;
+		this.shieldW = w;
+		this.shieldH = h;
+		this.shieldCol = color;
 	}
 	
-	public void decelerate () {
-		speedX = speedX * 0.9f;
-	    speedY = speedY * 0.9f;
+	public void display() {
+		PApplet.println("making");
+		p.fill(shieldCol);
+		p.rect(shieldPos.x, shieldPos.y, shieldW, shieldH);
 	}
-	
-	public void move () {
-	    speedX = p.mouseX - p.pmouseX;
-	    speedX = p.mouseY - p.pmouseY;
-	}
-	
-	public void make (){
-	    PApplet.println("making");
-	    p.fill(100 - p.mouseX, 200 - p.mouseY, 100);
-	    //rect(xPos - width/2,yPos,100,100);
-	    p.rect(xPos - p.width/2 + xLoc, yPos + xLoc, xLoc/2, xLoc/2);
-	}
-
 }

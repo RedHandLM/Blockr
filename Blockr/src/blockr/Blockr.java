@@ -3,7 +3,7 @@ package blockr;
 import processing.core.PApplet;
 import processing.core.PImage;
 import processing.core.PVector;
-import processing.video.Capture;
+//import processing.video.Capture;
 
 
 public class Blockr extends PApplet {
@@ -19,7 +19,7 @@ public class Blockr extends PApplet {
 	
 	// ***Camera variables
 	//----------------------------------
-	Capture cam;
+//	Capture cam;
 	float meR,meG,meB;
 	static float menowX = 0.0f;
 	static float menowY = 0.0f;
@@ -30,7 +30,7 @@ public class Blockr extends PApplet {
 	
 	// ***Shield Setup
 	//----------------------------------
-	Shield sh = new Shield();
+	//Shield sh = new Shield();
 	
 	// ***Me Setup
 	//----------------------------------
@@ -50,18 +50,21 @@ public class Blockr extends PApplet {
 		  
 		bg = loadImage ("background.png");
 		
+//		pushMatrix();
+//		translate(512,384);
+		
 		
 		// ***Camera Setup
 		//----------------------------------
-		String[] camNames = cam.list();
-		
-		meR = 255;
-		meG = 0;
-		meB = 0;
-		
-		cam = new Capture(this, 1024, 768);
-		
-		cam.start();
+//		String[] camNames = cam.list();
+//		
+//		meR = 255;
+//		meG = 0;
+//		meB = 0;
+//		
+//		cam = new Capture(this, 1024, 768);
+//		
+//		cam.start();
 		
 		// ***Me Setup
 		//----------------------------------
@@ -79,15 +82,11 @@ public class Blockr extends PApplet {
 		// ***BG
 		//----------------------------------
 		background(0);
-		image (bg, centerX + pmouseX/-1, centerY + pmouseY/-1);
+		image (bg, centerX + mePos.x/-10, centerY + mePos.y/-10);
 		  
 		// ***Shield
 		//----------------------------------
 		
-		//if (mousePressed) sh.move();
-		  
-		//sh.decelerate();
-		//sh.make();
 		
 		// ***Me
 		//----------------------------------
@@ -100,36 +99,41 @@ public class Blockr extends PApplet {
 		// ***Camera
 		//----------------------------------
 		
-		if(cam.available()){
-			cam.read();
-			//image(cam, 0, 0);
-			
-			fill(255);
-			float meY = meStartY;
-			float meX = meStartX;
-			
-			
-			int[] pixs = cam.pixels;
-			
-			float closestToColor = 100;
-			
-			for(int i = 0; i < pixs.length; i++){
-				int color = pixs[i];
-				
-				if(dist(meR, meG, meB, red(color), green(color), blue(color)) < closestToColor){
-					
-					closestToColor = dist(meR, meG, meB, red(color), green(color), blue(color));
-					
-					meY = i/cam.width;
-					meX = i%cam.width;
-					
-					menowX = meX;
-					menowY = meY;
-				}
-			}
-		}
-		
-		ellipse(mePos.x, mePos.y, 50, 50);
+//		if(cam.available()){
+//			cam.read();
+//			
+//			//image(cam, 0, 0);
+//			
+//			fill(255);
+//			float meY = meStartY;
+//			float meX = meStartX;
+//			
+//			
+//			int[] pixs = cam.pixels;
+//			
+//			float closestToColor = 100;
+//			
+//			for(int i = 0; i < pixs.length; i++){
+//				int color = pixs[i];
+//				
+//				if(dist(meR, meG, meB, red(color), green(color), blue(color)) < closestToColor){
+//					
+//					closestToColor = dist(meR, meG, meB, red(color), green(color), blue(color));
+//					
+//					
+//					meY = i/cam.width;
+//					meX = i%cam.width;
+//					
+//					menowX = meX;
+//					menowY = meY;
+//				}
+//			}
+//		}
+//		ellipse(mePos.x, mePos.y, 50, 50);
+	}
+	
+	public static void instShield(){
+		//sh.display();
 	}
 	
 	public static void main(String _args[]) {
