@@ -20,6 +20,9 @@ public class Blockr extends PApplet {
 	float centerX = width/2;
 	float centerY = height/2;
 	
+	float continuedX = 0.1f;
+	float continuedY = 0.1f;
+	
 	// ***Camera variables
 	//----------------------------------
 	Capture cam;
@@ -63,9 +66,17 @@ public class Blockr extends PApplet {
 	float meSpeed = 0.2f;
 	float meStartX, meStartY;
 	
+	PVector meCol;
+	int meRad;
+	int meC;
+	
 	// ***MIDI Variables
 	//----------------------------------
 	MidiBus nanoKontrol;
+	
+	// ***Bullet Variables
+	//----------------------------------
+	Bullet bull = new Bullet(200,200,200);
 	
 
 	public void setup() {
@@ -102,7 +113,13 @@ public class Blockr extends PApplet {
 		mePos = new PVector(meStartX, meStartY);
 		meDir = new PVector(menowX, menowY);
 		
+		meRad = 50;
+		
+		// ***Bullet Setup
 		//----------------------------------
+				
+		//----------------------------------
+		
 		  
 	}
 
@@ -111,8 +128,18 @@ public class Blockr extends PApplet {
 		//----------------------------------
 		background(0);
 
-		image (bg, centerX + menowX/-1, centerY + menowY/-1);
-		  
+		image (bg, centerX + mePos.x/20+continuedX, centerY + mePos.y/-20-continuedY);
+		
+		if (mePos.x < centerX){
+			continuedX = 0.1f;
+		} else if (mePos.x > centerX){
+			continuedX = 0.1f;
+		} if (mePos.y < centerY){
+			continuedY = -0.1f;
+		} else if (mePos.y > centerY){
+			continuedY = -0.1f;
+		}
+		
 		// ***Shield
 		//----------------------------------
 
@@ -125,6 +152,21 @@ public class Blockr extends PApplet {
 		//meDir.normalize();
 		PVector move = PVector.mult(meDir, meSpeed);
 		mePos.add(move);
+		
+		// ***Enemy
+		//----------------------------------
+		noStroke();
+		//fill(255);
+		//ellipse(bulletPos.x,bulletPos.y,10,10);
+		//bulletPos.x++;
+				
+		if (dist(mePos.x, mePos.y, bull.bX, bull.bY) < bull.bR + meRad){
+			meC = 0;
+		} else {
+			meC = 255;
+		}
+		
+		bull.render();
 		
 		// ***Camera
 		//----------------------------------
@@ -160,6 +202,7 @@ public class Blockr extends PApplet {
 		fill(255);
 		noStroke();
 		ellipse(mePos.x, mePos.y, 50, 50);
+		
 		noFill();
 		strokeWeight(21-((aDist1/PI)*20));
 		stroke(aRed1, aGreen1, aBlue1, aAlpha1);
@@ -226,6 +269,43 @@ public class Blockr extends PApplet {
 			aDist3 = map(value, 127, 0, 0, 50);
 		}
 		
+//		//The M-Audio Inputs - for testing by w
+//		
+//		if(number==8){//first fader
+//			aRed1 = map(value, 0, 127, 0, 255);
+//		}else if(number == 9){//second fader
+//			aGreen1 = map(value, 0, 127, 0, 255);
+//		}else if(number == 10){//third fader
+//			aBlue1 = map(value, 0, 127, 0, 255);
+//		}else if(number==12){//first knob
+//			aWeight1 = map(value, 127, 0, 1, 50); 
+//		}else if(number==13){//second knob
+//			aAlpha1 = map(value, 127, 0, 0, 255);
+//		}else if(number==14){//second knob
+//			aDist1 = map(value, 127, 0, 0, 255);
+//		}
+		
+	}
+	
+	
+//CLASSES
+	
+	class Bullet {
+		float bX;
+		float bY;
+		// the Bullet Radius
+		float bR;
+		
+		Bullet(float xpos, float ypos, float radius){
+			bX = xpos;
+			bY = ypos;
+			bR = radius;
+		}
+		
+		void render() {
+			fill(255);
+			ellipse (bX, bY, bR*2, bR*2);
+		}
 	}
 	
 	public static void main(String _args[]) {
