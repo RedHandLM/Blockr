@@ -4,6 +4,7 @@ import processing.core.PApplet;
 import processing.core.PImage;
 import processing.core.PVector;
 import processing.video.Capture;
+import themidibus.MidiBus;
 
 
 public class Blockr extends PApplet {
@@ -11,6 +12,9 @@ public class Blockr extends PApplet {
 	/**
 	 * 
 	 */
+	
+	MidiBus nanoKontrol;
+	
 	private static final long serialVersionUID = 1L;
 	// ***World-Coordinates
 	//----------------------------------
@@ -31,6 +35,11 @@ public class Blockr extends PApplet {
 	// ***Shield Setup
 	//----------------------------------
 	Shield sh = new Shield();
+	float sRed;
+	float sGreen;
+	float sBlue;
+	float sWeight;
+	float sAlpha;
 	
 	// ***Me Setup
 	//----------------------------------
@@ -44,9 +53,13 @@ public class Blockr extends PApplet {
 	public void setup() {
 		// ***World Setup
 		//----------------------------------
-		size (1024, 768);
+		size (1280, 720);
 		noStroke();
 		ellipseMode(CENTER);
+		
+		MidiBus.list();
+		
+		nanoKontrol = new MidiBus(this, 0, 3);
 		  
 		bg = loadImage ("background.png");
 		
@@ -59,7 +72,7 @@ public class Blockr extends PApplet {
 		meG = 0;
 		meB = 0;
 		
-		cam = new Capture(this, 1024, 768);
+		cam = new Capture(this, 1280, 720);
 		
 		cam.start();
 		
@@ -128,8 +141,34 @@ public class Blockr extends PApplet {
 				}
 			}
 		}
-		
+		fill(255);
+		noStroke();
 		ellipse(mePos.x, mePos.y, 50, 50);
+		noFill();
+		strokeWeight(sWeight);
+		stroke(sRed, sGreen, sBlue, sAlpha);
+		ellipse(mePos.x, mePos.y, 200, 200);
+	}
+	
+	//------------------THIS IS THE FUNCTION GETTING CHANGES IN VALUES FROM THE MIDI CONTROLLER
+	public void controllerChange(int channel, int number, int value){
+		println("+------+");
+		println("Channel: "+channel);
+		println("Number: "+number);
+		println("Value: "+value);
+		
+		if(number==33){//first fader
+			sRed = map(value, 0, 127, 0, 255);
+		}else if(number == 34){//second fader
+			sGreen = map(value, 0, 127, 0, 255);
+		}else if(number == 35){//third fader
+			sBlue = map(value, 0, 127, 0, 255);
+		}else if(number==17){//first knob
+			sWeight = map(value, 127, 0, 1, 50); 
+		}else if(number==18){//second knob
+			sAlpha = map(value, 127, 0, 0, 255);
+		}
+		
 	}
 	
 	public static void main(String _args[]) {
