@@ -13,9 +13,8 @@ public class Blockr extends PApplet {
 	 * 
 	 */
 	
-	MidiBus nanoKontrol;
-	
 	private static final long serialVersionUID = 1L;
+	
 	// ***World-Coordinates
 	//----------------------------------
 	float centerX = width/2;
@@ -32,22 +31,25 @@ public class Blockr extends PApplet {
 	//----------------------------------
 	PImage bg;
 	
-	// ***Shield Setup
+	// ***Shield Variables
 	//----------------------------------
-	Shield sh = new Shield();
 	float sRed;
 	float sGreen;
 	float sBlue;
 	float sWeight;
 	float sAlpha;
 	
-	// ***Me Setup
+	// ***Me Variables
 	//----------------------------------
 	PVector mePos;
 	PVector meDir;
 	float meAccel = 0.5f;
 	float meSpeed = 0.2f;
 	float meStartX, meStartY;
+	
+	// ***MIDI Variables
+	//----------------------------------
+	MidiBus nanoKontrol;
 	
 
 	public void setup() {
@@ -92,15 +94,8 @@ public class Blockr extends PApplet {
 		// ***BG
 		//----------------------------------
 		background(0);
-		image (bg, centerX + pmouseX/-1, centerY + pmouseY/-1);
-		  
-		// ***Shield
-		//----------------------------------
+		image (bg, centerX + mePos.x/-10, centerY + mePos.y/-10);
 		
-		//if (mousePressed) sh.move();
-		  
-		//sh.decelerate();
-		//sh.make();
 		
 		// ***Me
 		//----------------------------------
@@ -124,7 +119,7 @@ public class Blockr extends PApplet {
 			
 			int[] pixs = cam.pixels;
 			
-			float closestToColor = 100;
+			float closestToColor = 50;
 			
 			for(int i = 0; i < pixs.length; i++){
 				int color = pixs[i];
@@ -147,6 +142,7 @@ public class Blockr extends PApplet {
 		noFill();
 		strokeWeight(sWeight);
 		stroke(sRed, sGreen, sBlue, sAlpha);
+
 		ellipse(mePos.x, mePos.y, 200, 200);
 	}
 	
