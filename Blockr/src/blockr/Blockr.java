@@ -43,6 +43,7 @@ public class Blockr extends PApplet {
 	float aWeight1 = 2;
 	float aAlpha1 = 100;
 	float aDist1 = 0;
+	float aRotSpeed1;
 	
 	float aRed2 = 255;
 	float aGreen2 = 255;
@@ -209,11 +210,11 @@ public class Blockr extends PApplet {
 		rotate(PApplet.radians(angleOfShape));
 		strokeWeight(21-((aDist1/PI)*20));
 		stroke(aRed1, aGreen1, aBlue1, aAlpha1);
-		arc(mePos.x, mePos.y, 200.0f, 200.0f, PI-aDist1, PI+aDist1);
+		arc(0, 0, 200.0f, 200.0f, PI-aDist1, PI+aDist1);
 		popMatrix();
 		
 		//PUT KNOB INFO HERE
-		angleOfShape +=1;
+		angleOfShape +=aRotSpeed1;
 		
 		/*
 		strokeWeight(aWeight2);
@@ -240,7 +241,7 @@ public class Blockr extends PApplet {
 		}else if(number == 35){//third fader
 			aBlue1 = map(value, 0, 127, 0, 255);
 		}else if(number==17){//first knob
-			aWeight1 = map(value, 127, 0, 1, 30); 
+			aRotSpeed1 = map(value, 127, 0, -9.0f, 9.0f); 
 		}else if(number==18){//second knob
 			aAlpha1 = map(value, 127, 0, 100, 255);
 		}else if(number == 19){
