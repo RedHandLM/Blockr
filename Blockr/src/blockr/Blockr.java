@@ -3,7 +3,8 @@ package blockr;
 import processing.core.PApplet;
 import processing.core.PImage;
 import processing.core.PVector;
-//import processing.video.Capture;
+import processing.video.Capture;
+import themidibus.MidiBus;
 
 
 public class Blockr extends PApplet {
@@ -11,6 +12,9 @@ public class Blockr extends PApplet {
 	/**
 	 * 
 	 */
+	
+	MidiBus nanoKontrol;
+	
 	private static final long serialVersionUID = 1L;
 	// ***World-Coordinates
 	//----------------------------------
@@ -19,7 +23,7 @@ public class Blockr extends PApplet {
 	
 	// ***Camera variables
 	//----------------------------------
-//	Capture cam;
+	Capture cam;
 	float meR,meG,meB;
 	static float menowX = 0.0f;
 	static float menowY = 0.0f;
@@ -30,7 +34,12 @@ public class Blockr extends PApplet {
 	
 	// ***Shield Setup
 	//----------------------------------
-	//Shield sh = new Shield();
+	Shield sh = new Shield();
+	float sRed;
+	float sGreen;
+	float sBlue;
+	float sWeight;
+	float sAlpha;
 	
 	// ***Me Setup
 	//----------------------------------
@@ -44,27 +53,28 @@ public class Blockr extends PApplet {
 	public void setup() {
 		// ***World Setup
 		//----------------------------------
-		size (1024, 768);
+		size (1280, 720);
 		noStroke();
 		ellipseMode(CENTER);
+		
+		MidiBus.list();
+		
+		nanoKontrol = new MidiBus(this, 0, 3);
 		  
 		bg = loadImage ("background.png");
-		
-//		pushMatrix();
-//		translate(512,384);
 		
 		
 		// ***Camera Setup
 		//----------------------------------
-//		String[] camNames = cam.list();
-//		
-//		meR = 255;
-//		meG = 0;
-//		meB = 0;
-//		
-//		cam = new Capture(this, 1024, 768);
-//		
-//		cam.start();
+		String[] camNames = cam.list();
+		
+		meR = 255;
+		meG = 0;
+		meB = 0;
+		
+		cam = new Capture(this, 1280, 720);
+		
+		cam.start();
 		
 		// ***Me Setup
 		//----------------------------------
@@ -82,11 +92,15 @@ public class Blockr extends PApplet {
 		// ***BG
 		//----------------------------------
 		background(0);
-		image (bg, centerX + mePos.x/-10, centerY + mePos.y/-10);
+		image (bg, centerX + pmouseX/-1, centerY + pmouseY/-1);
 		  
 		// ***Shield
 		//----------------------------------
 		
+		//if (mousePressed) sh.move();
+		  
+		//sh.decelerate();
+		//sh.make();
 		
 		// ***Me
 		//----------------------------------
@@ -99,41 +113,62 @@ public class Blockr extends PApplet {
 		// ***Camera
 		//----------------------------------
 		
-//		if(cam.available()){
-//			cam.read();
-//			
-//			//image(cam, 0, 0);
-//			
-//			fill(255);
-//			float meY = meStartY;
-//			float meX = meStartX;
-//			
-//			
-//			int[] pixs = cam.pixels;
-//			
-//			float closestToColor = 100;
-//			
-//			for(int i = 0; i < pixs.length; i++){
-//				int color = pixs[i];
-//				
-//				if(dist(meR, meG, meB, red(color), green(color), blue(color)) < closestToColor){
-//					
-//					closestToColor = dist(meR, meG, meB, red(color), green(color), blue(color));
-//					
-//					
-//					meY = i/cam.width;
-//					meX = i%cam.width;
-//					
-//					menowX = meX;
-//					menowY = meY;
-//				}
-//			}
-//		}
-//		ellipse(mePos.x, mePos.y, 50, 50);
+		if(cam.available()){
+			cam.read();
+			//image(cam, 0, 0);
+			
+			fill(255);
+			float meY = meStartY;
+			float meX = meStartX;
+			
+			
+			int[] pixs = cam.pixels;
+			
+			float closestToColor = 100;
+			
+			for(int i = 0; i < pixs.length; i++){
+				int color = pixs[i];
+				
+				if(dist(meR, meG, meB, red(color), green(color), blue(color)) < closestToColor){
+					
+					closestToColor = dist(meR, meG, meB, red(color), green(color), blue(color));
+					
+					meY = i/cam.width;
+					meX = i%cam.width;
+					
+					menowX = meX;
+					menowY = meY;
+				}
+			}
+		}
+		fill(255);
+		noStroke();
+		ellipse(mePos.x, mePos.y, 50, 50);
+		noFill();
+		strokeWeight(sWeight);
+		stroke(sRed, sGreen, sBlue, sAlpha);
+		ellipse(mePos.x, mePos.y, 200, 200);
 	}
 	
-	public static void instShield(){
-		//sh.display();
+	//------------------THIS IS THE FUNCTION GETTING CHANGES IN VALUES FROM THE MIDI CONTROLLER
+	public void controllerChange(int channel, int number, int value){
+		println("+------+");
+		println("Channel: "+channel);
+		println("Number: "+number);
+		println("Value: "+value);
+		
+		if(number==33){//first fader
+			sRed = map(value, 0, 127, 0, 255);
+		}else if(number == 34){//second fader
+			sGreen = map(value, 0, 127, 0, 255);
+		}else if(number == 35){//third fader
+			sBlue = map(value, 0, 127, 0, 255);
+		}else if(number==17){//first knob
+			sWeight = map(value, 127, 0, 1, 50); 
+		}else if(number==18){//second knob
+			sAlpha = map(value, 127, 0, 0, 255);
+		}
+		
 	}
 	
 	public static void main(String _args[]) {
