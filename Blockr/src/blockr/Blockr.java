@@ -119,7 +119,7 @@ public class Blockr extends PApplet {
 			
 			int[] pixs = cam.pixels;
 			
-			float closestToColor = 50;
+			float closestToColor = 100;
 			
 			for(int i = 0; i < pixs.length; i++){
 				int color = pixs[i];
