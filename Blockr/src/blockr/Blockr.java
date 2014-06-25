@@ -8,7 +8,6 @@ import net.beadsproject.beads.data.Sample;
 import net.beadsproject.beads.ugens.Gain;
 import net.beadsproject.beads.ugens.SamplePlayer;
 import processing.core.PApplet;
-import processing.core.PImage;
 import processing.core.PVector;
 import processing.video.Capture;
 import themidibus.MidiBus;
@@ -39,7 +38,6 @@ public class Blockr extends PApplet {
 	
 	// ***Background
 	//----------------------------------
-	PImage bg;
 	ArrayList<PVector> stars = new ArrayList<PVector>();
 	
 	int randStar;
