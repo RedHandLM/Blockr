@@ -67,6 +67,8 @@ public class Blockr extends PApplet {
 	float shieldAngle;
 	boolean entered = false;
 	
+	int errorMargin = 50;
+	
 	// ***Me Variables
 	//----------------------------------
 	PVector mePos;
@@ -112,9 +114,8 @@ public class Blockr extends PApplet {
 	
 	// ***Bullet Variables
 	//----------------------------------
-	Bullet bull = new Bullet(400,200,50);
+	Bullet bull = new Bullet(400,200,50,255,0,0);
 	public boolean colliding = false;
-	PVector bullPos = new PVector(200, 200);
 	
 	//DEBUG
 	PVector testPos;
@@ -152,8 +153,11 @@ public class Blockr extends PApplet {
 		// ***BG Setup
 		//----------------------------------
 		for (int s = 0; s < 10000; s++) {
+			pushMatrix();
+			translate(-width*5, -height*5);
 			PVector sP = new PVector(random(10*width), random(10*height));
 			stars.add(sP);
+			popMatrix();
 		}
 		randStar = (int) random(-100,100);
 		
@@ -311,20 +315,31 @@ public class Blockr extends PApplet {
 		ellipse(mePos.x, mePos.y, shieldRad, shieldRad);
 		
 		if (dist(mePos.x, mePos.y, bull.bX, bull.bY) < bull.bR + shieldRad/2){
-			if (bull.bY > mePos.y && bulletAngle >= shieldAngle){
+			
+			//IF ENEMY IS HITTING THE SHIELD OR NOT
+			if (bulletAngle >= shieldAngle){
 				colCheck = 255;
-				entered = false;
-			} else if (bull.bY < mePos.y && bulletAngle >= shieldAngle){
-				colCheck = 100;
+				
+				//IF SHIELD COLOUR MATCHES ENEMY COLOUR
+				if ((bull.bRed - errorMargin) < aRed1 || aRed1 > (bull.bRed + errorMargin) 
+					&& (bull.bGreen - errorMargin) < aGreen1 || aGreen1 > (bull.bGreen + errorMargin) 
+					&& (bull.bBlue - errorMargin) < aBlue1 || aBlue1 > (bull.bBlue + errorMargin)){
+				PApplet.println("BLOCKED");
 				entered = false;
 			} else {
-				PApplet.println("ENTERED SHIELD");
+				PApplet.println("NOT BLOCKED");
 				entered = true;
-				colCheck = 50;
+			}
+				
+		} else {
+			//PApplet.println("ENTERED SHIELD");
+			colliding = true;
+			entered = true;
+			colCheck = 50;
 			}
 		} else {
 			colCheck = 10;
-		}
+		}	
 		
 		// ***Camera
 		//----------------------------------
@@ -387,13 +402,13 @@ public class Blockr extends PApplet {
 				float angleIncoming = PVector.angleBetween(new PVector(testPos.x, testPos.y), new PVector(50, 0));
 			popMatrix();
 		
+		//ANGLE TEST
+//		stroke(255, 0, 0, 255);
+//		strokeWeight(2);
 		
-		stroke(255, 0, 0, 255);
-		strokeWeight(2);
-		
-		line(mePos.x, mePos.y, testPos.x+mePos.x, testPos.y+mePos.y); //line from the origin to the bullet
-		stroke(0, 255, 0, 255);
-		line(mePos.x, mePos.y, mePos.x+50, mePos.y+0); //line from the origin to the reference
+//		line(mePos.x, mePos.y, testPos.x+mePos.x, testPos.y+mePos.y); //line from the origin to the bullet
+//		stroke(0, 255, 0, 255);
+//		line(mePos.x, mePos.y, mePos.x+50, mePos.y+0); //line from the origin to the reference
 		
 		bulletAngle = (degrees(angleIncoming));
 		shieldAngle = degrees(PI-aDist1);
@@ -426,7 +441,7 @@ public class Blockr extends PApplet {
 		noStroke();
 						
 						
-		if (mousePressed == true) {
+		if (colliding == true) {
 							
 			for (int i = 0; i < 100; i++) {
 				jX[i]= jX[i] + ((mePos.x-jX[i]) / (5.0f + (i*5.0f) ));
@@ -554,13 +569,6 @@ public class Blockr extends PApplet {
 		jCenterY=mePos.y;
 	}
 	
-	public void keyPressed() {
-		if (key == PApplet.RETURN || key == PApplet.ENTER){
-			PApplet.println("RETURN");
-			redraw();
-		}
-		
-	}
 	
 	
 //CLASSES
@@ -571,15 +579,21 @@ public class Blockr extends PApplet {
 		float bY;
 		// the Bullet Radius
 		float bR;
+		int bRed;
+		int bGreen;
+		int bBlue;
 		
-		Bullet(float xpos, float ypos, float radius){
+		Bullet(float xpos, float ypos, float radius, int r, int g, int b){
 			bX = xpos;
 			bY = ypos;
 			bR = radius;
+			bRed = r;
+			bGreen = g;
+			bBlue = b;
 		}
 		
 		void render() {
-			fill(255);
+			fill(bRed, bGreen, bBlue);
 			noStroke();
 			ellipse (bX, bY, bR*2, bR*2);
 		}
