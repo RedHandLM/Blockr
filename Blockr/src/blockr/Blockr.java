@@ -64,6 +64,7 @@ public class Blockr extends PApplet {
 	// ***Me Variables
 	//----------------------------------
 	PVector mePos;
+	PVector refPos;
 	PVector meDir;
 	float meAccel = 0.5f;
 	float meSpeed = 0.2f;
@@ -79,7 +80,12 @@ public class Blockr extends PApplet {
 	
 	// ***Bullet Variables
 	//----------------------------------
-	Bullet bull = new Bullet(200,200,50);
+	Bullet bull = new Bullet(400,200,50);
+	PVector bullPos = new PVector(200, 200);
+	
+	//DEBUG
+	PVector testPos;
+	int move = 1;
 	
 
 	public void setup() {
@@ -114,6 +120,7 @@ public class Blockr extends PApplet {
 		meStartY = height/2;
 		
 		mePos = new PVector(meStartX, meStartY);
+		refPos = new PVector(50, 0);
 		meDir = new PVector(menowX, menowY);
 		
 		meRad = 50;
@@ -143,9 +150,16 @@ public class Blockr extends PApplet {
 			continuedY = -0.1f;
 		}
 		
-		// ***Shield
+		// ***DEBUG
 		//----------------------------------
-
+		pushMatrix();
+		translate(mePos.x, mePos.y);
+		testPos = new PVector(-600+move, -285);
+		stroke(0, 0, 255, 255);
+		strokeWeight(5);
+		point(testPos.x, testPos.y);
+		move++;
+		popMatrix();
 		
 		
 		// ***Me
@@ -155,6 +169,7 @@ public class Blockr extends PApplet {
 		//meDir.normalize();
 		PVector move = PVector.mult(meDir, meSpeed);
 		mePos.add(move);
+		refPos.add(mePos);
 		
 		// ***Enemy
 		//----------------------------------
@@ -212,9 +227,22 @@ public class Blockr extends PApplet {
 		stroke(aRed1, aGreen1, aBlue1, aAlpha1);
 		arc(0, 0, 200.0f, 200.0f, PI-aDist1, PI+aDist1);
 		popMatrix();
+		pushMatrix();
+		translate(mePos.x, mePos.y);
+		float angleIncoming = PVector.angleBetween(new PVector(testPos.x, testPos.y), new PVector(50, 0));
+		popMatrix();
+		
+		
+		stroke(255, 0, 0, 255);
+		strokeWeight(2);
+		line(mePos.x, mePos.y, testPos.x+mePos.x, testPos.y+mePos.y); //line from the origin to the bullet
+		stroke(0, 255, 0, 255);
+		line(mePos.x, mePos.y, mePos.x+50, mePos.y+0); //line from the origin to the reference
+		println("angle incoming = "+degrees(angleIncoming));
+		
 		
 		//PUT KNOB INFO HERE
-		angleOfShape +=aRotSpeed1;
+		//angleOfShape +=aRotSpeed1;
 		
 		/*
 		strokeWeight(aWeight2);
