@@ -1,7 +1,12 @@
 package blockr;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
+import net.beadsproject.beads.core.AudioContext;
+import net.beadsproject.beads.data.Sample;
+import net.beadsproject.beads.ugens.Gain;
+import net.beadsproject.beads.ugens.SamplePlayer;
 import processing.core.PApplet;
 import processing.core.PImage;
 import processing.core.PVector;
@@ -41,6 +46,7 @@ public class Blockr extends PApplet {
 	float bri = 100.0f;
 	float bridir = random(1,3);
 	
+	
 	// ***Shield Variables
 	//----------------------------------
 
@@ -51,20 +57,6 @@ public class Blockr extends PApplet {
 	float aAlpha1 = 100;
 	float aDist1 = 0;
 	float aRotSpeed1;
-	
-	float aRed2 = 255;
-	float aGreen2 = 255;
-	float aBlue2 = 255;
-	float aWeight2 = 2;
-	float aAlpha2 = 100;
-	float aDist2 = 0;
-	
-	float aRed3 = 255;
-	float aGreen3 = 255;
-	float aBlue3 = 255;
-	float aWeight3 = 2;
-	float aAlpha3 = 100;
-	float aDist3 = 0;
 	
 	int angleOfShape;
 	
@@ -128,6 +120,20 @@ public class Blockr extends PApplet {
 	PVector testPos;
 	int move = 1;
 	
+	// ***SOUND VARIABLES
+	//---------------------------------
+	AudioContext ac;
+	
+	SamplePlayer engine;
+	SamplePlayer shield;
+	SamplePlayer shield_invert;
+	
+	Gain gEngine;
+	Gain gShield;
+	Gain gShieldInv;
+	
+	String sourceEngine;
+	
 
 	public void setup() {
 		
@@ -140,7 +146,7 @@ public class Blockr extends PApplet {
 		
 		MidiBus.list();
 		
-		nanoKontrol = new MidiBus(this, 0, 3);
+		nanoKontrol = new MidiBus(this, 3, 6);
 		
 		
 		// ***BG Setup
@@ -150,6 +156,22 @@ public class Blockr extends PApplet {
 			stars.add(sP);
 		}
 		randStar = (int) random(-100,100);
+		
+		// ***AudioContext
+		//----------------------------------
+		ac = new AudioContext();
+		
+		sourceEngine = sketchPath("")+"data/Engine_1.wav";
+		
+		try {
+			engine = new SamplePlayer(ac, new Sample(sketchPath("")+"data/Engine_1.wav"));
+			shield = new SamplePlayer(ac, new Sample(sketchPath("")+"data/Shield_Pad.wav"));
+			shield_invert = new SamplePlayer(ac, new Sample(sketchPath("")+"data/Shield_Pad_Inverted.wav"));
+		} catch (IOException e) {
+			println("COULDN'T LOAD AUDIO FILE");
+			e.printStackTrace();
+			exit();
+		}
 		
 		
 		
@@ -275,7 +297,7 @@ public class Blockr extends PApplet {
 		//MAKE BULLET
 		bull.render();
 		//MOVE BULLET
-		bull.bX ++;
+		bull.bX +=0.01f;
 		
 		
 		
@@ -491,7 +513,7 @@ public class Blockr extends PApplet {
 		}else if(number == 19){
 			aDist1 = map(value, 127f, 0f, PI, 0f);
 		}
-		
+		/*
 		//-------------------SECOND ARC
 		if(number==36){//first fader
 			aRed2 = map(value, 0, 127, 0, 255);
@@ -521,6 +543,7 @@ public class Blockr extends PApplet {
 		}else if(number == 25){
 			aDist3 = map(value, 127, 0, 0, 50);
 		}
+		*/
 	}
 	
 	
