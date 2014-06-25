@@ -1,5 +1,7 @@
 package blockr;
 
+import java.util.ArrayList;
+
 import processing.core.PApplet;
 import processing.core.PImage;
 import processing.core.PVector;
@@ -33,6 +35,11 @@ public class Blockr extends PApplet {
 	// ***Background
 	//----------------------------------
 	PImage bg;
+	ArrayList<PVector> stars = new ArrayList<PVector>();
+	
+	int randStar;
+	float bri = 100.0f;
+	float bridir = random(1,3);
 	
 	// ***Shield Variables
 	//----------------------------------
@@ -74,6 +81,29 @@ public class Blockr extends PApplet {
 	int meRad;
 	int meC;
 	
+	// ***Juice Variables
+	//----------------------------------
+		//Shield Juice
+		float [] jX = new float[100];
+		float [] jY = new float[100];
+		float [] jA = new float[100];
+		float [] jB = new float[100];
+		float [] jDOTx = new float[500];
+		float [] jDOTy = new float [500];
+		
+		float jRad = 3;
+		
+		float jRand = random (-250,250);
+		float jRand2 = random (-250,250);
+		float jRand3 = random (-250,250);
+		
+		float jCenterX = width/2;
+		float jCenterY = height/2;
+		
+		float jRed = random (100,200);
+		float jGreen = random (100, 200);
+		float jBlue= random (100, 200);
+	
 	// ***MIDI Variables
 	//----------------------------------
 	MidiBus nanoKontrol;
@@ -81,6 +111,7 @@ public class Blockr extends PApplet {
 	// ***Bullet Variables
 	//----------------------------------
 	Bullet bull = new Bullet(400,200,50);
+	public boolean colliding = false;
 	PVector bullPos = new PVector(200, 200);
 	
 	//DEBUG
@@ -98,9 +129,19 @@ public class Blockr extends PApplet {
 		MidiBus.list();
 		
 		nanoKontrol = new MidiBus(this, 0, 3);
-		  
-		bg = loadImage ("background.png");
 		
+		//noLoop();
+		  
+		//bg = loadImage ("background.png");
+		
+		// ***BG Setup
+		//----------------------------------
+		for (int s = 0; s < 10000; s++) {
+			PVector sP = new PVector(random(10*width), random(10*height));
+			stars.add(sP);
+		}
+		//bg = loadImage ("background.png");
+		randStar = (int) random(-100,100);
 		
 		// ***Camera Setup
 		//----------------------------------
@@ -120,7 +161,6 @@ public class Blockr extends PApplet {
 		meStartY = height/2;
 		
 		mePos = new PVector(meStartX, meStartY);
-		refPos = new PVector(50, 0);
 		meDir = new PVector(menowX, menowY);
 		
 		meRad = 50;
@@ -128,7 +168,19 @@ public class Blockr extends PApplet {
 		// ***Bullet Setup
 		//----------------------------------
 				
+		// ***Juice Setup
 		//----------------------------------
+		for (int jCount = 0; jCount < 500; jCount++){
+			jDOTx[jCount] = random (500);
+			jDOTy[jCount] = random(50);
+		}
+				
+		for (int jI = 0; jI < 100; jI++){
+			jX[jI] = 250;
+			jY[jI] = 250;
+			jA[jI] = jRand2;
+			jB[jI] = jRand3;
+		}
 		
 		  
 	}
@@ -137,28 +189,50 @@ public class Blockr extends PApplet {
 		// ***BG
 		//----------------------------------
 		background(0);
-
-		image (bg, centerX + mePos.x/20+continuedX, centerY + mePos.y/-20-continuedY);
+		noStroke();
+		fill(bri);
 		
-		if (mePos.x < centerX){
-			continuedX = 0.1f;
-		} else if (mePos.x > centerX){
-			continuedX = 0.1f;
-		} if (mePos.y < centerY){
-			continuedY = -0.1f;
-		} else if (mePos.y > centerY){
-			continuedY = -0.1f;
+		for (int i = 0; i < stars.size(); i++){
+			PVector sP = stars.get(i);
+			PVector sM = new PVector((mePos.x-meDir.x)/800, (mePos.y-meDir.y)/800);
+			
+			if (mePos.x > width/2){
+				sP.x -= sM.x;
+			} else if (mePos.x < width/2){
+				sP.x += sM.x;
+			}
+			
+			if (mePos.y < height/2){
+				sP.y += sM.y;
+			}else if (mePos.y > height/2){
+				sP.y -= sM.y;
+			}
+			
+//			if (sP.x > width/2 | sP.y > height/2){
+//				sP.add(sM);
+//			} else if (sP.x < width/2 | sP.y > height/2){
+//				sP.add(sM);
+//			}
+			float d = dist(sP.x, sP.y, width/2, height/2);
+			d = map(d, 0, width/2, 0, 3);
+			ellipse(sP.x, sP.y, d, d);
+			//ellipse(sP.x+randStar, sP.y+randStar, d+2, d+2);
+		}
+		if (bri < 0){
+			bri = 0;
+		} else if (bri > 255) {
+			bri = 255;
+			bridir = random(-1, -3);
 		}
 		
 		// ***DEBUG
 		//----------------------------------
 		pushMatrix();
 		translate(mePos.x, mePos.y);
-		testPos = new PVector(-600+move, -285);
-		stroke(0, 0, 255, 255);
-		strokeWeight(5);
-		point(testPos.x, testPos.y);
-		move++;
+			testPos = new PVector(bull.bX-mePos.x, bull.bY-mePos.y);
+			stroke(0, 0, 255, 255);
+			strokeWeight(100);
+			point(testPos.x, testPos.y);
 		popMatrix();
 		
 		
@@ -169,19 +243,22 @@ public class Blockr extends PApplet {
 		//meDir.normalize();
 		PVector move = PVector.mult(meDir, meSpeed);
 		mePos.add(move);
-		refPos.add(mePos);
 		
 		// ***Enemy
 		//----------------------------------
 		//CHECK COLLISION
 		if (dist(mePos.x, mePos.y, bull.bX, bull.bY) < bull.bR/2 + meRad){
+			colliding = true;
 			meC = 0;
 		} else {
+			colliding = false;
 			meC = 255;
 		}
 		
 		//MAKE BULLET
 		bull.render();
+		//MOVE BULLET
+		bull.bX ++;
 		
 		// ***Camera
 		//----------------------------------
@@ -197,7 +274,7 @@ public class Blockr extends PApplet {
 			
 			int[] pixs = cam.pixels;
 			
-			float closestToColor = 100;
+			float closestToColor = 98;
 			
 			for(int i = 0; i < pixs.length; i++){
 				int color = pixs[i];
@@ -209,8 +286,11 @@ public class Blockr extends PApplet {
 					meY = i/cam.width;
 					meX = i%cam.width;
 					
-					menowX = meX;
-					menowY = meY;
+					meStartX = meX;
+					meStartY = meY;
+					
+					menowX = meStartX;
+					menowY = meStartY;
 				}
 			}
 		}
@@ -252,6 +332,81 @@ public class Blockr extends PApplet {
 		stroke(aRed3, aGreen3, aBlue3, aAlpha3);
 		arc(mePos.x, mePos.y, 200.0f-aDist3, 200.0f-aDist3, (4*PI)/3, 2*PI);
 		*/
+		
+		
+		
+		
+		// ***Juice
+		//-------------------------
+						
+		fill (jRed, jGreen, jBlue);
+		noStroke();
+						
+						
+		if (mousePressed == true) {
+							
+			for (int i = 0; i < 100; i++) {
+				jX[i]= jX[i] + ((mePos.x-jX[i]) / (5.0f + (i*5.0f) ));
+				jY[i]= jY[i] + ((mePos.y-jY[i]) / (5.0f + (i*5.0f) ));
+				}
+						 
+			int newDot = 0;
+			int arms=7;
+			jCenterX = jCenterX + ((mePos.x-jCenterX)/100.0f);
+			jCenterY = jCenterY+((mePos.y-jCenterY)/100.0f);
+			
+			while (newDot<arms) {
+				pushMatrix();
+				translate(mePos.x, mePos.y);
+				rotate((TWO_PI/arms)*newDot);
+			  	translate(-jCenterX, -jCenterY);
+						 
+			  	for (int i = 0; i < 100; i++) {
+		    		ellipse (jX[i], jY[i], jRad, jRad);
+		    		//ellipse (mouseX-a[i], mouseY-b[i], 2,2);
+			  	}
+			  	popMatrix();
+						 
+			  	newDot++;
+			}
+						 
+			//ellipse(jCenterX, jCenterY, jRad, jRad);
+		}
+						   
+				else {
+						 
+				   float r = 5;
+				   float t = 5;
+				   for (int i = 0; i < 100; i++) {
+					   jX[i]= jX[i] + ((mePos.x-jX[i]) / (5.0f + (i*5.0f) ));
+					   jX[i]= jY[i] + ((mePos.y-jY[i]) / (5.0f + (i*5.0f) ));
+				   }
+						 
+				   int newDot = 0;
+				   int arms=7;
+				   //jCenterX=jCenterX+((mePos.x-centerX)/50.0f);
+				   //jCenterY=jCenterY+((mePos.y-centerY)/50.0f);
+						 
+				   while (newDot<arms) {
+					   pushMatrix();
+					   translate(mePos.x, mePos.y);
+					   rotate((TWO_PI/arms)*newDot);
+					   translate(-jCenterX, -jCenterY);
+						 
+					   for (int i = 0; i < 100; i++) {
+						   fill(jRed, jGreen, jBlue, t);
+						   ellipse (jX[i], jY[i], jRad, jRad);
+					   }
+						 
+					   popMatrix();
+						 
+					   newDot++;
+				   }
+						    
+				   fill(jRed, jGreen, jBlue, t);
+				   ellipse(mePos.x, mePos.y, r, r);
+				   
+				}
 	}
 	
 	//------------------THIS IS THE FUNCTION GETTING CHANGES IN VALUES FROM THE MIDI CONTROLLER
@@ -305,22 +460,21 @@ public class Blockr extends PApplet {
 		}else if(number == 25){
 			aDist3 = map(value, 127, 0, 0, 50);
 		}
-		
-//		//The M-Audio Inputs - for testing by w
-//		
-//		if(number==8){//first fader
-//			aRed1 = map(value, 0, 127, 0, 255);
-//		}else if(number == 9){//second fader
-//			aGreen1 = map(value, 0, 127, 0, 255);
-//		}else if(number == 10){//third fader
-//			aBlue1 = map(value, 0, 127, 0, 255);
-//		}else if(number==12){//first knob
-//			aWeight1 = map(value, 127, 0, 1, 50); 
-//		}else if(number==13){//second knob
-//			aAlpha1 = map(value, 127, 0, 0, 255);
-//		}else if(number==14){//second knob
-//			aDist1 = map(value, 127, 0, 0, 255);
-//		}
+	}
+	
+	
+
+	public void mousePressed (){
+		PApplet.println("Mouse Pressed");
+		jCenterX=mePos.x;
+		jCenterY=mePos.y;
+	}
+	
+	public void keyPressed() {
+		if (key == PApplet.RETURN || key == PApplet.ENTER){
+			PApplet.println("RETURN");
+			redraw();
+		}
 		
 	}
 	
