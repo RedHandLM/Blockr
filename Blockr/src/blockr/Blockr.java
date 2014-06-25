@@ -68,6 +68,13 @@ public class Blockr extends PApplet {
 	
 	int angleOfShape;
 	
+	//Collision Stuff
+	float shieldRad = 200.0f;
+	int colCheck;
+	float bulletAngle;
+	float shieldAngle;
+	boolean entered = false;
+	
 	// ***Me Variables
 	//----------------------------------
 	PVector mePos;
@@ -80,6 +87,9 @@ public class Blockr extends PApplet {
 	PVector meCol;
 	int meRad;
 	int meC;
+	
+	float health;
+	float healthBar;
 	
 	// ***Juice Variables
 	//----------------------------------
@@ -120,6 +130,8 @@ public class Blockr extends PApplet {
 	
 
 	public void setup() {
+		
+		
 		// ***World Setup
 		//----------------------------------
 		size (1280, 720);
@@ -130,9 +142,6 @@ public class Blockr extends PApplet {
 		
 		nanoKontrol = new MidiBus(this, 0, 3);
 		
-		//noLoop();
-		  
-		//bg = loadImage ("background.png");
 		
 		// ***BG Setup
 		//----------------------------------
@@ -140,8 +149,9 @@ public class Blockr extends PApplet {
 			PVector sP = new PVector(random(10*width), random(10*height));
 			stars.add(sP);
 		}
-		//bg = loadImage ("background.png");
 		randStar = (int) random(-100,100);
+		
+		
 		
 		// ***Camera Setup
 		//----------------------------------
@@ -155,6 +165,7 @@ public class Blockr extends PApplet {
 		
 		cam.start();
 		
+		
 		// ***Me Setup
 		//----------------------------------
 		meStartX = width/2;
@@ -164,6 +175,9 @@ public class Blockr extends PApplet {
 		meDir = new PVector(menowX, menowY);
 		
 		meRad = 50;
+		
+		health = 100.0f;
+		healthBar = 100.0f;
 		
 		// ***Bullet Setup
 		//----------------------------------
@@ -190,7 +204,7 @@ public class Blockr extends PApplet {
 		//----------------------------------
 		background(0);
 		noStroke();
-		fill(bri);
+		fill(255);
 		
 		for (int i = 0; i < stars.size(); i++){
 			PVector sP = stars.get(i);
@@ -208,11 +222,6 @@ public class Blockr extends PApplet {
 				sP.y -= sM.y;
 			}
 			
-//			if (sP.x > width/2 | sP.y > height/2){
-//				sP.add(sM);
-//			} else if (sP.x < width/2 | sP.y > height/2){
-//				sP.add(sM);
-//			}
 			float d = dist(sP.x, sP.y, width/2, height/2);
 			d = map(d, 0, width/2, 0, 3);
 			ellipse(sP.x, sP.y, d, d);
@@ -236,6 +245,7 @@ public class Blockr extends PApplet {
 		popMatrix();
 		
 		
+		
 		// ***Me
 		//----------------------------------
 		meDir = new PVector(menowX, menowY);
@@ -244,11 +254,18 @@ public class Blockr extends PApplet {
 		PVector move = PVector.mult(meDir, meSpeed);
 		mePos.add(move);
 		
+		
+		
 		// ***Enemy
 		//----------------------------------
 		//CHECK COLLISION
 		if (dist(mePos.x, mePos.y, bull.bX, bull.bY) < bull.bR/2 + meRad){
 			colliding = true;
+			if (entered){
+				PApplet.println("HURT");
+				health -= 1.0f;
+				healthBar -= 1.0f;
+			}
 			meC = 0;
 		} else {
 			colliding = false;
@@ -259,6 +276,33 @@ public class Blockr extends PApplet {
 		bull.render();
 		//MOVE BULLET
 		bull.bX ++;
+		
+		
+		
+		// ***Shield
+		//----------------------------------
+		//CHECK SHIELD COLLISION
+		fill (255,0,0);
+		rect(mePos.x+100, mePos.y+10, healthBar, 6);
+		
+		fill(colCheck);
+		ellipse(mePos.x, mePos.y, shieldRad, shieldRad);
+		
+		if (dist(mePos.x, mePos.y, bull.bX, bull.bY) < bull.bR + shieldRad/2){
+			if (bull.bY > mePos.y && bulletAngle >= shieldAngle){
+				colCheck = 255;
+				entered = false;
+			} else if (bull.bY < mePos.y && bulletAngle >= shieldAngle){
+				colCheck = 100;
+				entered = false;
+			} else {
+				PApplet.println("ENTERED SHIELD");
+				entered = true;
+				colCheck = 50;
+			}
+		} else {
+			colCheck = 10;
+		}
 		
 		// ***Camera
 		//----------------------------------
@@ -294,34 +338,49 @@ public class Blockr extends PApplet {
 				}
 			}
 		}
+		
+		// MAKE MEEEE
 		fill(meC);
 		noStroke();
 		ellipse(mePos.x, mePos.y, 50, 50);
 		
+		
+		
+		// MAKE SHIELD
 		noFill();
+		
+		//aDist1 = PI/2;
 		
 		pushMatrix();
 		translate(mePos.x, mePos.y);
-		rotate(PApplet.radians(angleOfShape));
-		strokeWeight(21-((aDist1/PI)*20));
-		stroke(aRed1, aGreen1, aBlue1, aAlpha1);
-		arc(0, 0, 200.0f, 200.0f, PI-aDist1, PI+aDist1);
-		popMatrix();
-		pushMatrix();
-		translate(mePos.x, mePos.y);
-		float angleIncoming = PVector.angleBetween(new PVector(testPos.x, testPos.y), new PVector(50, 0));
-		popMatrix();
+			rotate(PApplet.radians(angleOfShape));
+			
+			strokeWeight(21-((aDist1/PI)*20));
+			stroke(aRed1, aGreen1, aBlue1, aAlpha1);
+			arc(0, 0, 200.0f, 200.0f, PI-aDist1, PI+aDist1);
+			
+			popMatrix();
+			pushMatrix();
+			translate(mePos.x, mePos.y);
+				float angleIncoming = PVector.angleBetween(new PVector(testPos.x, testPos.y), new PVector(50, 0));
+			popMatrix();
 		
 		
 		stroke(255, 0, 0, 255);
 		strokeWeight(2);
+		
 		line(mePos.x, mePos.y, testPos.x+mePos.x, testPos.y+mePos.y); //line from the origin to the bullet
 		stroke(0, 255, 0, 255);
 		line(mePos.x, mePos.y, mePos.x+50, mePos.y+0); //line from the origin to the reference
-		println("angle incoming = "+degrees(angleIncoming));
+		
+		bulletAngle = (degrees(angleIncoming));
+		shieldAngle = degrees(PI-aDist1);
+		
+//		PApplet.println("bulletAngle = " +bulletAngle);
+//		PApplet.println("shieldAngle = " +shieldAngle);
 		
 		
-		//PUT KNOB INFO HERE
+		//PUT ROTATION INFO HERE
 		//angleOfShape +=aRotSpeed1;
 		
 		/*
@@ -332,6 +391,8 @@ public class Blockr extends PApplet {
 		stroke(aRed3, aGreen3, aBlue3, aAlpha3);
 		arc(mePos.x, mePos.y, 200.0f-aDist3, 200.0f-aDist3, (4*PI)/3, 2*PI);
 		*/
+		
+		
 		
 		
 		
