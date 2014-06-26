@@ -349,13 +349,14 @@ public class Blockr extends PApplet {
 				ouch = true;
 				bullets[i].isActive = false;
 				
-				if (health >= 0){
-					health -= 1.0f;
-					healthBar -= 1.0f;
-				} else {
+				if (health > 0){
+					health -= 10.0f;
+					healthBar -= 10.0f;
+				} else if (health <= 0){
 					health = 0.0f;
 					healthBar = 0.0f;
 				}
+				
 				if(!isPlaying_Hit){
 					int h = (int)random(3);
 					switch(h) {
@@ -404,10 +405,14 @@ public class Blockr extends PApplet {
 		// ***Shield
 		//----------------------------------
 		//CHECK SHIELD COLLISION
+		fill(255);
+		textSize(10);
+		text("H E A L T H", mePos.x+103, mePos.y-34);
+		text("P O I N T S", mePos.x+148, mePos.y+2);
 		noFill();
 		strokeWeight(1);
 		stroke(255,255,255,100);
-		rect (mePos.x+100,mePos.y-30, 100, 20);
+		rect (mePos.x+100,mePos.y-30, 105, 20);
 		rect(mePos.x+102, mePos.y-20, scoreBar, 5);
 		
 		noStroke();
@@ -437,8 +442,8 @@ public class Blockr extends PApplet {
 								sfx_absorb.trigger();
 								
 								if (scoreBar < 100.0f){
-									scoreBar += 1.0f;
-								} else {
+									scoreBar += 10.0f;
+								} else if (scoreBar >= 100.0f) {
 									scoreBar = 100.0f;
 								}
 								
@@ -448,20 +453,24 @@ public class Blockr extends PApplet {
 							} else {
 								colliding = true;
 								entered = true;
+								ouch = false;
 							}
 							
 							
 						} else{
 							colliding = true;
 							entered = true;
+							ouch = false;
 						}
 					} else {
 						colliding = true;
 						entered = true;
+						ouch = false;
 					}
 				} else {
 					colliding = true;
 					entered = true;
+					ouch = false;
 				}
 				
 			} else {
@@ -542,10 +551,10 @@ public class Blockr extends PApplet {
 		// MAKE SHIELD
 		noFill();
 		
-//		aRed1 = 255;
-//		aGreen1 = 100;
-//		aBlue1 = 0;
-//		aDist1 = PI/2;
+		aRed1 = 255;
+		aGreen1 = 100;
+		aBlue1 = 0;
+		aDist1 = PI/2;
 		
 		
 		pushMatrix();
@@ -827,17 +836,17 @@ public class Blockr extends PApplet {
 //				bDir = new PVector(random(mePos.x-100,mePos.x+100), random(mePos.y-100, mePos.y+100));
 			
 			if (bR >= 10 && bR < 20){
-				bX -= (bX-bDir.x)*0.001f;
-				bY -= (bY-bDir.y)*0.001f;
+				bX -= (bX-bDir.x)*0.01f;
+				bY -= (bY-bDir.y)*0.01f;
 			} else if (bR >= 20 && bR < 45){
 				bX = fluxRand1*cos(fluxX*t+fluxW+10)+width/2;
 			    bY = fluxRand2*sin(fluxY*t+fluxH-10)+height/2;
 			} else if (bR >=45 && bR < 75){
-				bX -= (bX-bDir.x)*0.001f;
-				bY -= (bY-bDir.y)*0.001f;
+				bX -= (bX-bDir.x)*0.005f;
+				bY -= (bY-bDir.y)*0.005f;
 			} else if (bR >= 75){
-				bX -= (bX-bDir.x)*0.001f;
-				bY -= (bY-bDir.y)*0.001f;
+				bX -= (bX-bDir.x)*0.003f;
+				bY -= (bY-bDir.y)*0.003f;
 			}
 			
 			t += velocity;
