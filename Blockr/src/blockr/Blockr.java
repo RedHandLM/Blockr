@@ -35,7 +35,7 @@ public class Blockr extends PApplet {
 	
 	// ***Camera variables
 	//----------------------------------
-	//Capture cam;
+	Capture cam;
 	float meR,meG,meB;
 	static float menowX = 0.0f;
 	static float menowY = 0.0f;
@@ -49,8 +49,6 @@ public class Blockr extends PApplet {
 	int randStar;
 	float bri = 100.0f;
 	float bridir = random(1,3);
-	
-	boolean bloomAlphaSwitch;
 
 	
 	
@@ -131,7 +129,10 @@ public class Blockr extends PApplet {
 	
 	// ***Bullet Variables
 	//----------------------------------
-	Bullet bull = new Bullet(400,200,50,255,0,0);
+	int totalBullets = 10;
+	Bullet[] bullets = new Bullet[totalBullets];
+	
+	//Bullet bull = new Bullet(400,200,50,255,0,0);
 	public boolean colliding = false;
 	
 	
@@ -139,8 +140,7 @@ public class Blockr extends PApplet {
 	//DEBUG
 	PVector testPos;
 	int move = 1;
-	
-	
+	float angleIncoming;
 	
 	//TIMER
 	
@@ -198,7 +198,6 @@ public class Blockr extends PApplet {
 			PVector sP = new PVector((random(10*width))-5*width, (random(10*height))-5*width);
 			stars.add(sP);
 		}
-		bloomAlphaSwitch = true;
 		randStar = (int) random(-100,100);
 		
 		// ***AudioContext
@@ -250,9 +249,9 @@ public class Blockr extends PApplet {
 		meG = 0;
 		meB = 0;
 		
-		//cam = new Capture(this, 1280, 720);
+		cam = new Capture(this, 1280, 720);
 		
-		//cam.start();
+		cam.start();
 		
 		
 		// ***Me Setup
@@ -268,8 +267,14 @@ public class Blockr extends PApplet {
 		health = 100.0f;
 		healthBar = 100.0f;
 		
+		
 		// ***Bullet Setup
 		//----------------------------------
+		for (int i = 0; i < totalBullets; i++){
+			bullets[i] = new Bullet();
+			bullets[i].render();
+		}
+		
 				
 		// ***Juice Setup
 		//----------------------------------
@@ -327,13 +332,15 @@ public class Blockr extends PApplet {
 		
 		// ***DEBUG
 		//----------------------------------
+		for (int i = 0; i < totalBullets; i++){
 		pushMatrix();
 		translate(mePos.x, mePos.y);
-			testPos = new PVector(bull.bX-mePos.x, bull.bY-mePos.y);
-			stroke(0, 0, 255, 255);
-			strokeWeight(100);
-			point(testPos.x, testPos.y);
+			testPos = new PVector(bullets[i].bX-mePos.x, bullets[i].bY-mePos.y);
+			//stroke(0, 0, 255, 255);
+			//strokeWeight(100);
+			//point(testPos.x, testPos.y);
 		popMatrix();
+		}
 		
 		
 		
@@ -350,7 +357,8 @@ public class Blockr extends PApplet {
 		// ***Enemy
 		//----------------------------------
 		//CHECK COLLISION
-		if (dist(mePos.x, mePos.y, bull.bX, bull.bY) < bull.bR/2 + meRad){
+		for (int i = 0; i < totalBullets; i++){
+		if (dist(mePos.x, mePos.y, bullets[i].bX, bullets[i].bY) < bullets[i].bR/2 + meRad){
 			colliding = true;
 			if (entered){
 				PApplet.println("HURT");
@@ -359,8 +367,8 @@ public class Blockr extends PApplet {
 					healthBar -= 1.0f;
 				}
 				if(!isPlaying_Hit){
-					int i = (int)random(3);
-					switch(i) {
+					int h = (int)random(3);
+					switch(h) {
 					case 0:
 						sfx_hit_lo.trigger();
 						break;
@@ -384,11 +392,15 @@ public class Blockr extends PApplet {
 			sfx_hit_tre.stop();
 			meC = 255;
 		}
+		}
 		
 		//MAKE BULLET
-		bull.render();
+		for (int i = 0; i < totalBullets; i++){
+			bullets[i].make();
+			bullets[i].move();
 		//MOVE BULLET
-		bull.bX +=0.01f;
+		//bull.bX +=0.01f;
+		}
 		
 		
 		
@@ -407,44 +419,50 @@ public class Blockr extends PApplet {
 		fill(colCheck,0);
 		ellipse(mePos.x, mePos.y, shieldRad, shieldRad);
 		
-		if (dist(mePos.x, mePos.y, bull.bX, bull.bY) < bull.bR + shieldRad/2){
+		for (int i = 0; i < totalBullets; i++){
+		if (dist(mePos.x, mePos.y, bullets[i].bX, bullets[i].bY) < bullets[i].bR + shieldRad/2){
 			
 			//IF ENEMY IS HITTING THE SHIELD OR NOT
-			if (bulletAngle+((bull.bR/PI)*2) >= shieldAngle){
+			if (bulletAngle+((bullets[i].bR/PI)*2) >= shieldAngle){
 				colCheck = 255;
 				
 				//IF SHIELD COLOUR MATCHES ENEMY COLOUR
-				if ((bull.bRed - errorMargin) < aRed1 || aRed1 > (bull.bRed + errorMargin) 
-					&& (bull.bGreen - errorMargin) < aGreen1 || aGreen1 > (bull.bGreen + errorMargin) 
-					&& (bull.bBlue - errorMargin) < aBlue1 || aBlue1 > (bull.bBlue + errorMargin)){
-					
-					//bullet radius 5 ~ 100 -- shield strength 1 - 21
-					if (bull.bR < shieldStrength*5){
-						PApplet.println("BLOCKED");
-						sfx_absorb.trigger();
-						entered = false;
+				if ((bullets[i].bRed - errorMargin) < aRed1 || aRed1 > (bullets[i].bRed + errorMargin)) {
+					if ((bullets[i].bGreen - errorMargin) < aGreen1 || aGreen1 > (bullets[i].bGreen + errorMargin)){
+						if ((bullets[i].bBlue - errorMargin) < aBlue1 || aBlue1 > (bullets[i].bBlue + errorMargin)){
+							//bullet radius 5 ~ 100 -- shield strength 1 - 21
+							if (bullets[i].bR < shieldStrength*5){
+								PApplet.println("BLOCKED");
+								sfx_absorb.trigger();
+								entered = false;
+							} else {
+								entered = true;
+							}
+						} else{
+							entered = true;
+						}
 					} else {
 						entered = true;
 					}
-			} else {
-				PApplet.println("NOT BLOCKED");
-				entered = true;
-			}
+				} else {
+					entered = true;
+				}
 				
-		} else {
+			} else {
 			//PApplet.println("ENTERED SHIELD");
 			colliding = true;
 			entered = true;
 			colCheck = 50;
 			}
 		} else {
-			colCheck = 10;
-		}	
+			colCheck = 10;	
+		}
+		}
 		
 		// ***Camera
 		//----------------------------------
 		
-		/*if(cam.available()){
+		if(cam.available()){
 			cam.read();
 			//image(cam, 0, 0);
 			
@@ -479,11 +497,11 @@ public class Blockr extends PApplet {
 				
 				}
 			}
-		}*/
+		}
 		
 		
-		menowX = mouseX;
-		menowY = mouseY;
+		//menowX = mouseX;
+		//menowY = mouseY;
 		
 		
 		//Checking when the player is moving
@@ -508,10 +526,10 @@ public class Blockr extends PApplet {
 		// MAKE SHIELD
 		noFill();
 		
-		aRed1 = 255;
-		aGreen1 = 0;
-		aBlue1 = 0;
-		aDist1 = PI/2;
+//		aRed1 = 255;
+//		aGreen1 = 0;
+//		aBlue1 = 0;
+//		aDist1 = PI/2;
 		
 		
 		pushMatrix();
@@ -523,11 +541,11 @@ public class Blockr extends PApplet {
 			stroke(aRed1, aGreen1, aBlue1, aAlpha1);
 			arc(0, 0, 200.0f, 200.0f, PI-aDist1, PI+aDist1);
 			
-			popMatrix();
-			pushMatrix();
-			translate(mePos.x, mePos.y);
-				float angleIncoming = PVector.angleBetween(new PVector(testPos.x, testPos.y), new PVector(50, 0));
-			popMatrix();
+		popMatrix();
+		pushMatrix();
+		translate(mePos.x, mePos.y);
+		angleIncoming = PVector.angleBetween(new PVector(testPos.x, testPos.y), new PVector(50, 0));
+		popMatrix();
 		
 		//ANGLE TEST
 //		stroke(255, 0, 0, 255);
@@ -542,7 +560,7 @@ public class Blockr extends PApplet {
 		
 //		println("bulletAngle = " +bulletAngle);
 //		println("shieldAngle = " +shieldAngle);
-		println (shieldStrength);
+//		println (shieldStrength);
 		
 		
 		//PUT ROTATION INFO HERE
@@ -601,7 +619,6 @@ public class Blockr extends PApplet {
 						   
 				else {
 						 
-				   float r = 3;
 				   float t = 5;
 				   for (int i = 0; i < 100; i++) {
 					   jX[i]= jX[i] + ((mePos.x-jX[i]) / (5.0f + (i*5.0f) ));
@@ -634,7 +651,7 @@ public class Blockr extends PApplet {
 				   
 				}
 	}
-	/*
+	
 	//------------------THIS IS THE FUNCTION GETTING CHANGES IN VALUES FROM THE MIDI CONTROLLER
 	public void controllerChange(int channel, int number, int value){
 		println("+------+");
@@ -695,7 +712,7 @@ public class Blockr extends PApplet {
 			aDist3 = map(value, 127, 0, 0, 50);
 		}
 		*/
-	//}
+	}
 	
 	
 
@@ -721,27 +738,164 @@ public class Blockr extends PApplet {
 	
 	//Bullet Class
 	class Bullet {
-		float bX;
+		float bX = random(-10, width+10);
 		float bY;
-		// the Bullet Radius
-		float bR;
-		int bRed;
-		int bGreen;
-		int bBlue;
 		
-		Bullet(float xpos, float ypos, float radius, int r, int g, int b){
+		// the Bullet Radius
+		float bR = random(5,100);
+		// the Bullet Color
+		float bRed = random(255);
+		float bGreen = random(255);
+		float bBlue = random(255);
+		
+		PVector bulletPos;
+		PVector bDir;
+		//float bSpeed;
+		
+
+		
+		float dirX;
+		float dirY;
+		float speed;
+		
+		float t = 5;
+		float velocity = 0.003f;
+		
+		//move variables
+		float fluxX = 8;
+		float fluxY = 5*t;
+		float fluxW = 0;
+		float fluxH = 0.5f*t;
+		
+		float dirRand1x = random(mePos.x-10,mePos.x+10);
+		float dirRand1y = random(mePos.y-10,mePos.y+10);
+		float dirRand2x = random(mePos.x-20,mePos.x+20);
+		float dirRand2y = random(mePos.y-20,mePos.y+20);
+//		float dirRand1x = random(-1,1);
+//		float dirRand1y = random(-1,1);
+//		float dirRand2x = random(-2,2);
+//		float dirRand2y = random(-2,2);
+		float fluxRand1 = random(100,250);
+		float fluxRand2 = random(50,200);
+		float speedRand1 = random(0.5f, 1.0f);
+		float speedRand2 = random(0.5f, 1.0f);
+		
+		PVector move;
+		
+		
+		
+		/*Bullet(float xpos, float ypos, float radius, int r, int g, int b, 
+				float dirX, float dirY, float speed){
 			bX = xpos;
 			bY = ypos;
 			bR = radius;
 			bRed = r;
 			bGreen = g;
 			bBlue = b;
+			
+			bulletPos = new PVector(bX, bY);
+			bDir = new PVector(dirX, dirY);
+			bSpeed = speed;
+		}*/
+		
+		Bullet(){
+			
+			
+		}
+		void render(){
+//			int i = (int)random(2);
+//			switch(i) {
+//				case 0:
+//					bX = -10
+//					break;
+//				case 1:
+//					bX = width+10;
+//					break;
+//			}
+//			
+//			int y = (int)random(2);
+//			switch(y) {
+//				case 0:
+//					bY = -10
+//					break;
+//				case 1:
+//					bY = height+10
+//					break;
+//			}
+			
+			if (bX < 0 || bX > width){
+				bY = random(height);
+			} else {
+				int y = (int)random(2);
+				switch(y) {
+				case 0:
+					bY = -10;
+					break;
+				case 1:
+					bY = height+10;
+					break;
+				}
+			}
+			
+//			bR = random(5,100);
+//			bRed = (255);
+//			bGreen = (255);
+//			bBlue = (255);
+			
+			
+//			bulletPos = new PVector(bX, bY);
+//			bDir = new PVector(dirX, dirY);
+//			bSpeed = speed;
 		}
 		
-		void render() {
-			fill(bRed, bGreen, bBlue);
+		void make() {
+			
+			if (bR >= 5 && bR < 10){
+				dirX = mePos.x;
+				dirY = mePos.y;
+				speed = 0.5f;
+			} else if (bR >= 10 && bR < 45){
+				bX = fluxRand1*cos(fluxX*t+fluxW+10)+width/2;
+			    bY = fluxRand2*sin(fluxY*t+fluxH-10)+height/2;
+			} else if (bR >=45 && bR < 75){
+				dirX = mePos.x;
+				dirY = mePos.y;
+				speed = speedRand1;
+			} else if (bR >= 75){
+				dirX = mePos.x;
+				dirY = mePos.y;
+				speed = speedRand2;
+			}
+			
+			bulletPos = new PVector(bX, bY);
+			bDir = new PVector(dirX, dirY);
+			
+			
+			//println(move);
+			//println(bDir);
+			//println(speed);
+			
+//			fill(bRed, bGreen, bBlue, 100);
+//			noStroke();
+//			ellipse (bX, bY, bR, bR);
+//			ellipse (bX, bY, bR*2, bR*2);
+		}
+		
+		void move(){
+			t += velocity;
+			
+			bDir.sub(bulletPos);
+			
+			bDir = bulletPos;
+			move = PVector.mult(bDir, speed);
+			bulletPos.add(move);
+			
+			fill(bRed, bGreen, bBlue, 100);
 			noStroke();
+			ellipse (bX, bY, bR, bR);
 			ellipse (bX, bY, bR*2, bR*2);
+			
+			
 		}
 	}
 	
