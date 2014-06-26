@@ -50,7 +50,7 @@ public class Blockr extends PApplet {
 	float bri = 100.0f;
 	float bridir = random(1,3);
 	
-	int totalNovas = 30;
+	int totalNovas = 35;
 	Star[] novas = new Star[totalNovas];
 
 	
@@ -86,6 +86,9 @@ public class Blockr extends PApplet {
 	
 	// ***Me Variables
 	//----------------------------------
+	public PImage esq;
+	public PImage tri;
+	
 	PVector mePos;
 	PVector refPos;
 	PVector meDir;
@@ -193,7 +196,7 @@ public class Blockr extends PApplet {
 		// ***BG Setup
 		//----------------------------------
 		for (int s = 0; s < 10000; s++) {
-			PVector sP = new PVector((random(10*width))-5*width, (random(10*height))-5*width);
+			PVector sP = new PVector((random(5*width))-2.5f*width, (random(5*height))-2.5f*width);
 			stars.add(sP);
 		}
 		
@@ -253,11 +256,14 @@ public class Blockr extends PApplet {
 		mePos = new PVector(meStartX, meStartY);
 		meDir = new PVector(menowX, menowY);
 		
-		meRad = 50;
+		meRad = 75;
 		
 		health = 100.0f;
 		healthBar = 100.0f;
 		scoreBar = 0.0f;
+		
+		esq = loadImage("esquisitice.png");
+		tri = loadImage("color.png");
 		
 		
 		// ***Bullet Setup
@@ -284,8 +290,13 @@ public class Blockr extends PApplet {
 		
 		  
 	}
+	public void draw(){
+		background(0);
+		
+		//um();
+	}
 
-	public void draw() {
+	public void um() {
 		// ***BG
 		//----------------------------------
 		background(0);
@@ -575,9 +586,15 @@ public class Blockr extends PApplet {
 		// MAKE MEEEE
 		fill(meC);
 		noStroke();
-		ellipse(mePos.x, mePos.y, 50, 50);
-		fill(0,255,255,10);
-		ellipse(meDir.x, meDir.y, 50, 50);
+		pushMatrix();
+		translate(mePos.x, mePos.y);
+		imageMode(CORNER);
+		image(esq, -68, -97);
+		imageMode(CENTER);
+		rotate(PApplet.radians(angleOfShape));
+		image(tri, 0, 0);
+		popMatrix();
+		//ellipse(mePos.x, mePos.y, 50, 50);
 		
 		
 		
