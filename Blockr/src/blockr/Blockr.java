@@ -1,6 +1,6 @@
 package blockr;
 
-import java.io.IOException;
+//import java.io.IOException;
 import java.util.ArrayList;
 
 import ddf.minim.AudioPlayer;
@@ -50,7 +50,7 @@ public class Blockr extends PApplet {
 	float bri = 100.0f;
 	float bridir = random(1,3);
 	
-	int totalNovas = 50;
+	int totalNovas = 30;
 	Star[] novas = new Star[totalNovas];
 
 	
@@ -599,7 +599,7 @@ public class Blockr extends PApplet {
 		
 		
 		//PUT ROTATION INFO HERE
-		angleOfShape +=aRotSpeed1;
+		angleOfShape += aRotSpeed1;
 		
 		/*
 		strokeWeight(aWeight2);
