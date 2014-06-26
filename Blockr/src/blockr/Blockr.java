@@ -49,6 +49,7 @@ public class Blockr extends PApplet {
 	float bri = 100.0f;
 	float bridir = random(1,3);
 	
+	boolean bloomAlphaSwitch;
 	
 	// ***Shield Variables
 	//----------------------------------
@@ -98,7 +99,7 @@ public class Blockr extends PApplet {
 		float [] jDOTx = new float[500];
 		float [] jDOTy = new float [500];
 		
-		float jRad = 3;
+		float jRad = 4;
 		
 		float jRand = random (-250,250);
 		float jRand2 = random (-250,250);
@@ -123,6 +124,12 @@ public class Blockr extends PApplet {
 	//DEBUG
 	PVector testPos;
 	int move = 1;
+	
+	//TIMER
+	
+	int savedTime;
+	int totalTime;
+	int passedTime;
 	
 	// ***SOUND VARIABLES
 	//---------------------------------
@@ -171,12 +178,10 @@ public class Blockr extends PApplet {
 		// ***BG Setup
 		//----------------------------------
 		for (int s = 0; s < 10000; s++) {
-			pushMatrix();
-			translate(-width*5, -height*5);
-			PVector sP = new PVector(random(10*width), random(10*height));
+			PVector sP = new PVector((random(10*width))-5*width, (random(10*height))-5*width);
 			stars.add(sP);
-			popMatrix();
 		}
+		bloomAlphaSwitch = true;
 		randStar = (int) random(-100,100);
 		
 		// ***AudioContext
@@ -223,7 +228,6 @@ public class Blockr extends PApplet {
 		
 		// ***Camera Setup
 		//----------------------------------
-		String[] camNames = cam.list();
 		
 		meR = 255;
 		meG = 0;
@@ -302,6 +306,8 @@ public class Blockr extends PApplet {
 			bridir = random(-1, -3);
 		}
 		
+		
+		
 		// ***DEBUG
 		//----------------------------------
 		pushMatrix();
@@ -331,8 +337,10 @@ public class Blockr extends PApplet {
 			colliding = true;
 			if (entered){
 				PApplet.println("HURT");
-				health -= 1.0f;
-				healthBar -= 1.0f;
+				if (health >= 0){
+					health -= 1.0f;
+					healthBar -= 1.0f;
+				}
 				if(!isPlaying_Hit){
 					int i = (int)random(3);
 					switch(i) {
@@ -370,10 +378,16 @@ public class Blockr extends PApplet {
 		// ***Shield
 		//----------------------------------
 		//CHECK SHIELD COLLISION
-		fill (255,0,0);
-		rect(mePos.x+100, mePos.y+10, healthBar, 6);
+		noFill();
+		strokeWeight(1);
+		stroke(255,255,255,100);
+		rect (mePos.x+100,mePos.y-30, 100, 20);
 		
-		fill(colCheck);
+		noStroke();
+		fill (255,255,255,100);
+		rect(mePos.x+102, mePos.y-27, healthBar, 5);
+		
+		fill(colCheck,0);
 		ellipse(mePos.x, mePos.y, shieldRad, shieldRad);
 		
 		if (dist(mePos.x, mePos.y, bull.bX, bull.bY) < bull.bR + shieldRad/2){
@@ -433,8 +447,8 @@ public class Blockr extends PApplet {
 					meStartX = meX;
 					meStartY = meY;
 					
-					menowX = meStartX;
-					menowY = meStartY;
+					menowX = mouseX;
+					menowY = mouseY;
 					
 					
 				}else{
@@ -445,9 +459,13 @@ public class Blockr extends PApplet {
 		}
 		
 		
+		/*menowX = mouseX;
+		menowY = mouseY;*/
+		
+		
 		//Checking when the player is moving
 		PVector isMoving = PVector.sub(mePos, meDir);
-		println(move);
+		//println(move);
 		if(abs(move.x) > 2.3f && abs(move.x) < 2.5f && abs(move.y) > 1.1f && abs(move.y) < 1.3f){
 			sfx_engine.mute();
 		}else {
@@ -529,8 +547,8 @@ public class Blockr extends PApplet {
 						 
 			int newDot = 0;
 			int arms=7;
-			jCenterX = jCenterX + ((mePos.x-jCenterX)/100.0f);
-			jCenterY = jCenterY+((mePos.y-jCenterY)/100.0f);
+			jCenterX += ((jCenterX)/60.0f);
+			jCenterY += ((mePos.y-jCenterY)/20.0f);
 			
 			while (newDot<arms) {
 				pushMatrix();
@@ -539,8 +557,8 @@ public class Blockr extends PApplet {
 			  	translate(-jCenterX, -jCenterY);
 						 
 			  	for (int i = 0; i < 100; i++) {
-		    		ellipse (jX[i], jY[i], jRad, jRad);
-		    		//ellipse (mouseX-a[i], mouseY-b[i], 2,2);
+		    		ellipse (jX[i]/4, jY[i]/4, jRad, jRad);
+		    		ellipse (mePos.x-jA[i]/3, mePos.y-jB[i]/3, 5,5);
 			  	}
 			  	popMatrix();
 						 
@@ -552,7 +570,7 @@ public class Blockr extends PApplet {
 						   
 				else {
 						 
-				   float r = 5;
+				   float r = 3;
 				   float t = 5;
 				   for (int i = 0; i < 100; i++) {
 					   jX[i]= jX[i] + ((mePos.x-jX[i]) / (5.0f + (i*5.0f) ));
@@ -561,8 +579,8 @@ public class Blockr extends PApplet {
 						 
 				   int newDot = 0;
 				   int arms=7;
-				   //jCenterX=jCenterX+((mePos.x-centerX)/50.0f);
-				   //jCenterY=jCenterY+((mePos.y-centerY)/50.0f);
+				   jCenterX=((mePos.x-centerX)/100.0f);
+				   jCenterY=((mePos.y-centerY)/100.0f);
 						 
 				   while (newDot<arms) {
 					   pushMatrix();
@@ -572,7 +590,7 @@ public class Blockr extends PApplet {
 						 
 					   for (int i = 0; i < 100; i++) {
 						   fill(jRed, jGreen, jBlue, t);
-						   ellipse (jX[i], jY[i], jRad, jRad);
+						   ellipse (jX[i]/3, jY[i]/3, jRad, jRad);
 					   }
 						 
 					   popMatrix();
@@ -580,8 +598,8 @@ public class Blockr extends PApplet {
 					   newDot++;
 				   }
 						    
-				   fill(jRed, jGreen, jBlue, t);
-				   ellipse(mePos.x, mePos.y, r, r);
+				   //fill(jRed, jGreen, jBlue, t);
+				   //ellipse(mePos.x, mePos.y, r, r);
 				   
 				}
 	}
@@ -656,6 +674,16 @@ public class Blockr extends PApplet {
 		jCenterY=mePos.y;
 	}
 	
+	public void waitFor (int waitTime){
+		totalTime = waitTime;
+		savedTime = millis();
+		
+		passedTime = millis() - savedTime;
+		if (passedTime > totalTime){
+			println(waitTime/1000 + " secs passed");
+			savedTime = millis();
+		}
+	}
 	
 	
 //CLASSES
@@ -685,6 +713,7 @@ public class Blockr extends PApplet {
 			ellipse (bX, bY, bR*2, bR*2);
 		}
 	}
+	
 	
 	public static void main(String _args[]) {
 		PApplet.main(new String[] { blockr.Blockr.class.getName() });
