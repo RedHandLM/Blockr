@@ -175,6 +175,9 @@ public class Blockr extends PApplet {
 	boolean isPlaying_Shield = false;
 	boolean isLooping_Shield = false;
 	boolean isPlaying_Hit = false;
+	boolean isPlaying_Absorb = false;
+	boolean sfx_triggerHit = false;
+	boolean sfx_triggerAbsorb = false;
 
 	public void setup() {
 		
@@ -374,7 +377,7 @@ public class Blockr extends PApplet {
 				meC = 0;
 				ouch = true;
 				bullets[i].isActive = false;
-				
+				sfx_triggerHit = true;
 				if (health > 0){
 					health -= 10.0f;
 					healthBar -= 10.0f;
@@ -383,32 +386,15 @@ public class Blockr extends PApplet {
 					healthBar = 0.0f;
 				}
 				
-				if(!isPlaying_Hit){
-					int h = (int)random(3);
-					switch(h) {
-					case 0:
-						sfx_hit_lo.trigger();
-						break;
-					case 1:
-						sfx_hit_mid.trigger();
-						break;
-					case 2:
-						sfx_hit_tre.trigger();
-						break;
-					}
-				isPlaying_Hit = true;
-				}
+				
 			} else {
 				ouch = false;
 				println("NOTHURT");
 				meC = 255;
+				sfx_triggerHit = false;
 			}
 		} else {
 			colliding = false;
-			isPlaying_Hit = false;
-			sfx_hit_lo.stop();
-			sfx_hit_mid.stop();
-			sfx_hit_tre.stop();
 			meC = 255;
 		}
 		}
@@ -457,7 +443,7 @@ public class Blockr extends PApplet {
 			if (bulletAngle+((bullets[i].bR/PI)*2) >= shieldAngle-angleOfShape){
 				colCheck = 255;
 				println("IS HITTING THE SHIELD");
-				sfx_get.trigger();
+				
 				
 				//IF SHIELD COLOUR MATCHES ENEMY COLOUR
 				if ((bullets[i].bRed - errorMargin) < aRed1 || aRed1 > (bullets[i].bRed + errorMargin)) {
@@ -468,7 +454,7 @@ public class Blockr extends PApplet {
 							//bullet radius 5 ~ 100 -- shield strength 1 - 21
 							if (bullets[i].bR < shieldStrength*5){
 								println("BLOCKED");
-								sfx_absorb.trigger();
+								sfx_triggerAbsorb = true;
 								
 								if (scoreBar < 100.0f){
 									scoreBar += 10.0f;
@@ -484,6 +470,7 @@ public class Blockr extends PApplet {
 								colliding = true;
 								entered = true;
 								ouch = false;
+								sfx_triggerAbsorb = false;
 							}
 							
 							
@@ -517,6 +504,34 @@ public class Blockr extends PApplet {
 			colCheck = 10;	
 		}
 		}
+		
+		// ***Audio Booleans
+		// ---------------------------------
+		
+		if(sfx_triggerHit){
+			if(!isPlaying_Hit){
+				sfx_hit_mid.trigger();
+				isPlaying_Hit = true;
+			}else{
+				sfx_triggerHit = false;
+			}
+		}else if(!sfx_triggerHit){
+			isPlaying_Hit = false;
+		}
+		
+		if(sfx_triggerAbsorb){
+			if(!isPlaying_Absorb){
+				sfx_absorb.trigger();
+			isPlaying_Absorb = true;
+			}else{
+				sfx_triggerAbsorb = false;
+			}
+		}else if(!sfx_triggerAbsorb){
+			isPlaying_Absorb = false;
+		}
+		
+		if(sfx_triggerAbsorb) println("-----------------------------------trig: "+sfx_triggerAbsorb+"\n isPlay: "+isPlaying_Absorb);
+			
 		
 		// ***Camera
 		//----------------------------------
@@ -583,11 +598,12 @@ public class Blockr extends PApplet {
 		
 		// MAKE SHIELD
 		noFill();
-		
+		/* DEBUG VARIABLES
 		aRed1 = 255;
 		aGreen1 = 100;
 		aBlue1 = 0;
 		aDist1 = PI/2;
+		*/
 		
 		
 		pushMatrix();
@@ -722,12 +738,12 @@ public class Blockr extends PApplet {
 	//------------------THIS IS THE FUNCTION GETTING CHANGES IN VALUES FROM THE MIDI CONTROLLER
 	public void controllerChange(int channel, int number, int value){
 		
-		/*
+		
 		println("+------+");
 		println("Channel: "+channel);
 		println("Number: "+number);
 		println("Value: "+value);
-		*/
+		
 		
 		//-------------------FIRST ARC
 		if(number==33){//first fader - RED
