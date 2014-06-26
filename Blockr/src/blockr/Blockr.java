@@ -430,21 +430,28 @@ public class Blockr extends PApplet {
 				if ((bullets[i].bRed - errorMargin) < aRed1 || aRed1 > (bullets[i].bRed + errorMargin)) {
 					if ((bullets[i].bGreen - errorMargin) < aGreen1 || aGreen1 > (bullets[i].bGreen + errorMargin)){
 						if ((bullets[i].bBlue - errorMargin) < aBlue1 || aBlue1 > (bullets[i].bBlue + errorMargin)){
+							
+							//IF SHIELD STRENGTH MATCHES ENEMY SIZE
 							//bullet radius 5 ~ 100 -- shield strength 1 - 21
 							if (bullets[i].bR < shieldStrength*5){
 								PApplet.println("BLOCKED");
 								sfx_absorb.trigger();
+								
 								entered = false;
 							} else {
+								colliding = true;
 								entered = true;
 							}
 						} else{
+							colliding = true;
 							entered = true;
 						}
 					} else {
+						colliding = true;
 						entered = true;
 					}
 				} else {
+					colliding = true;
 					entered = true;
 				}
 				
@@ -488,13 +495,12 @@ public class Blockr extends PApplet {
 					meStartX = meX;
 					meStartY = meY;
 					
-					menowX = mouseX;
-					menowY = mouseY;
+					menowX = meX;
+					menowY = meY;
 					
 					
 				}else{
 					//engineMinim.stop();
-				
 				}
 			}
 		}
