@@ -49,6 +49,9 @@ public class Blockr extends PApplet {
 	int randStar;
 	float bri = 100.0f;
 	float bridir = random(1,3);
+	
+	int totalNovas = 50;
+	Star[] novas = new Star[totalNovas];
 
 	
 	
@@ -192,7 +195,11 @@ public class Blockr extends PApplet {
 			PVector sP = new PVector((random(10*width))-5*width, (random(10*height))-5*width);
 			stars.add(sP);
 		}
-		randStar = (int) random(-100,100);
+		
+		
+		for (int i = 0; i < totalNovas; i++){
+			novas[i] = new Star();
+		}
 		
 		// ***AudioContext
 		//----------------------------------
@@ -312,6 +319,9 @@ public class Blockr extends PApplet {
 			bridir = random(-1, -3);
 		}
 		
+		for (int i = 0; i < totalNovas; i++){
+			novas[i].display();
+		}
 		
 		
 		// ***DEBUG
@@ -869,6 +879,70 @@ public class Blockr extends PApplet {
 		
 	}
 	
+	class Star {
+	  float origX = random(2*width)-1*width;
+	  float origY = random(2*height)-1*width;
+	  float v = random(0.001f, 0.005f);
+	  float value = random(0,3);
+	  float x1 = 0;
+	  float y1 = 0;
+	  float x2 = 5;
+	  float y2 = 0;
+
+	  float radius;
+	  float angle;
+
+	  Star() {
+	  }
+
+	  void display() {
+	    pushMatrix();
+	    translate(origX, origY);
+	    strokeWeight(1);
+	    stroke(255);
+
+	    rotate(QUARTER_PI+angle);
+	    line(x1, y1, x2, y2);
+	    rotate(QUARTER_PI);
+	    line(x1, y1, x2, y2);
+	    rotate(QUARTER_PI);
+	    line(x1, y1, x2, y2);
+	    rotate(QUARTER_PI);
+	    line(x1, y1, x2, y2);
+	    rotate(QUARTER_PI);
+	    line(x1, y1, x2, y2);
+	    rotate(QUARTER_PI);
+	    line(x1, y1, x2, y2);
+	    rotate(QUARTER_PI);
+	    line(x1, y1, x2, y2);
+	    rotate(QUARTER_PI);
+	    line(x1, y1, x2, y2);
+	    noFill();
+	    for (int i =1; i < 30; i++) {
+	      //ellipse(0, 0, (radius*radius)/i, (radius*radius)/i);
+	    }
+	    ellipse(0, 0, (radius), (1/radius)*20);
+	    rotate(QUARTER_PI);
+	    ellipse(0, 0, (radius), (1/radius)*20);
+	    rotate(QUARTER_PI);
+	    ellipse(0, 0, (radius), (1/radius)*20);
+	    rotate(QUARTER_PI);
+	    ellipse(0, 0, (radius), (1/radius)*20);
+
+	    x2+=sin(value)/10;
+	    y1+=sin(value)/10;
+	    angle += sin(value)/10;
+	    radius += sin(value)/2;
+
+	    if (x2 > 10) x2--;
+	    if (y1 > 0) y1--;
+	    if (angle > 0) angle -=0.01;
+
+
+	    value+=0.005;
+	    popMatrix();
+	  }
+	}
 	
 	public static void main(String _args[]) {
 		PApplet.main(new String[] { blockr.Blockr.class.getName() });
