@@ -31,9 +31,16 @@ public class Blockr extends PApplet {
 	float continuedX = 0.1f;
 	float continuedY = 0.1f;
 	
-	boolean startGame = false;
-	boolean noGame = true;
+	static boolean startGame = false;
+	static boolean noGame = true;
 	boolean keyEnter = false;
+	
+	boolean End = false;
+	static boolean inGame = false;
+	static boolean endGame = false;
+	static boolean preGame = true;
+	
+	public PImage image;
 	
 	
 	
@@ -47,7 +54,6 @@ public class Blockr extends PApplet {
 	
 	// ***Background
 	//----------------------------------
-	PImage bg;
 	ArrayList<PVector> stars = new ArrayList<PVector>();
 	
 	float bri = 100.0f;
@@ -303,36 +309,44 @@ public class Blockr extends PApplet {
 		
 		  
 	}
+	
+	public void keyPressed(){
+		if (key == ENTER || key == RETURN){
+			keyEnter = true;
+		}
+	}
 	public void draw(){
 		
-		if (noGame){
-			pregame();
-			startGame = false;
+		if (keyEnter){
+			inGame = true;
+			endGame = false;
+			preGame = false;
+		}
+		
+		if (End){
+			inGame = false;
+			endGame = true;
+		}
+		
+		if (endGame){
+			imageMode(CORNER);
+			image = loadImage("MENU.png");
+			image(image,0,0);
 			sfx_engine.mute();
 		}
 		
-		if (keyEnter){
-			game();
+		
+		if (preGame){
+			preGame = true;
+			inGame = false;
 			noGame = false;
-			sfx_engine.unmute();
+			background(255);
+			image = loadImage("MENU.png");
+			image(image,0,0);
+			sfx_engine.mute();
 		}
-	}
 	
-	public void keyPressed(){
-		if (key == RETURN || key == ENTER){
-			println("key");
-			keyEnter = true;
-		} else {
-			keyEnter = false;
-		}
-	}
-	public void pregame(){
-		
-		background(255);
-		
-	}
-
-	public void game() {
+		if (inGame){
 		// ***BG
 		//----------------------------------
 		background(0);
@@ -427,6 +441,7 @@ public class Blockr extends PApplet {
 					health -= 10.0f;
 					healthBar -= 10.0f;
 				} else if (health <= 0){
+					End = true;
 					health = 0.0f;
 					healthBar = 0.0f;
 				}
@@ -503,6 +518,7 @@ public class Blockr extends PApplet {
 									scoreBar += 10.0f;
 								} else if (scoreBar >= 100.0f) {
 									scoreBar = 100.0f;
+									End = true;
 								}
 								
 								bullets[i].isActive = false;
@@ -782,6 +798,7 @@ public class Blockr extends PApplet {
 				   //ellipse(mePos.x, mePos.y, r, r);
 				   
 				}
+		}
 	}
 	
 	//------------------THIS IS THE FUNCTION GETTING CHANGES IN VALUES FROM THE MIDI CONTROLLER
