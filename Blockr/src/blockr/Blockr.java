@@ -18,12 +18,10 @@ import themidibus.MidiBus;
 
 
 public class Blockr extends PApplet {
-	
-	/**
-	 * 
-	 */
-	
+
 	private static final long serialVersionUID = 1L;
+	
+	
 	
 	// ***World-Coordinates
 	//----------------------------------
@@ -33,12 +31,15 @@ public class Blockr extends PApplet {
 	float continuedX = 0.1f;
 	float continuedY = 0.1f;
 	
+	
+	
 	// ***Camera variables
 	//----------------------------------
-	Capture cam;
+	//Capture cam;
 	float meR,meG,meB;
 	static float menowX = 0.0f;
 	static float menowY = 0.0f;
+	
 	
 	// ***Background
 	//----------------------------------
@@ -50,6 +51,8 @@ public class Blockr extends PApplet {
 	float bridir = random(1,3);
 	
 	boolean bloomAlphaSwitch;
+
+	
 	
 	// ***Shield Variables
 	//----------------------------------
@@ -73,6 +76,10 @@ public class Blockr extends PApplet {
 	
 	int errorMargin = 50;
 	
+	float shieldStrength;
+	
+	
+	
 	// ***Me Variables
 	//----------------------------------
 	PVector mePos;
@@ -89,41 +96,51 @@ public class Blockr extends PApplet {
 	float health;
 	float healthBar;
 	
+	
+	
 	// ***Juice Variables
 	//----------------------------------
-		//Shield Juice
-		float [] jX = new float[100];
-		float [] jY = new float[100];
-		float [] jA = new float[100];
-		float [] jB = new float[100];
-		float [] jDOTx = new float[500];
-		float [] jDOTy = new float [500];
+	//Shield Juice
+	float [] jX = new float[100];
+	float [] jY = new float[100];
+	float [] jA = new float[100];
+	float [] jB = new float[100];
+	float [] jDOTx = new float[500];
+	float [] jDOTy = new float [500];
+	
+	float jRad = 4;
 		
-		float jRad = 4;
-		
-		float jRand = random (-250,250);
-		float jRand2 = random (-250,250);
-		float jRand3 = random (-250,250);
-		
-		float jCenterX = width/2;
-		float jCenterY = height/2;
-		
-		float jRed = random (100,200);
-		float jGreen = random (100, 200);
-		float jBlue= random (100, 200);
+	float jRand = random (-250,250);
+	float jRand2 = random (-250,250);
+	float jRand3 = random (-250,250);
+	
+	float jCenterX = width/2;
+	float jCenterY = height/2;
+	
+	float jRed = random (100,200);
+	float jGreen = random (100, 200);
+	float jBlue= random (100, 200);
+	
+	
 	
 	// ***MIDI Variables
 	//----------------------------------
 	MidiBus nanoKontrol;
+	
+	
 	
 	// ***Bullet Variables
 	//----------------------------------
 	Bullet bull = new Bullet(400,200,50,255,0,0);
 	public boolean colliding = false;
 	
+	
+	
 	//DEBUG
 	PVector testPos;
 	int move = 1;
+	
+	
 	
 	//TIMER
 	
@@ -233,9 +250,9 @@ public class Blockr extends PApplet {
 		meG = 0;
 		meB = 0;
 		
-		cam = new Capture(this, 1280, 720);
+		//cam = new Capture(this, 1280, 720);
 		
-		cam.start();
+		//cam.start();
 		
 		
 		// ***Me Setup
@@ -393,16 +410,22 @@ public class Blockr extends PApplet {
 		if (dist(mePos.x, mePos.y, bull.bX, bull.bY) < bull.bR + shieldRad/2){
 			
 			//IF ENEMY IS HITTING THE SHIELD OR NOT
-			if (bulletAngle >= shieldAngle){
+			if (bulletAngle+((bull.bR/PI)*2) >= shieldAngle){
 				colCheck = 255;
 				
 				//IF SHIELD COLOUR MATCHES ENEMY COLOUR
 				if ((bull.bRed - errorMargin) < aRed1 || aRed1 > (bull.bRed + errorMargin) 
 					&& (bull.bGreen - errorMargin) < aGreen1 || aGreen1 > (bull.bGreen + errorMargin) 
 					&& (bull.bBlue - errorMargin) < aBlue1 || aBlue1 > (bull.bBlue + errorMargin)){
-				PApplet.println("BLOCKED");
-				sfx_absorb.trigger();
-				entered = false;
+					
+					//bullet radius 5 ~ 100 -- shield strength 1 - 21
+					if (bull.bR < shieldStrength*5){
+						PApplet.println("BLOCKED");
+						sfx_absorb.trigger();
+						entered = false;
+					} else {
+						entered = true;
+					}
 			} else {
 				PApplet.println("NOT BLOCKED");
 				entered = true;
@@ -421,7 +444,7 @@ public class Blockr extends PApplet {
 		// ***Camera
 		//----------------------------------
 		
-		if(cam.available()){
+		/*if(cam.available()){
 			cam.read();
 			//image(cam, 0, 0);
 			
@@ -456,11 +479,11 @@ public class Blockr extends PApplet {
 				
 				}
 			}
-		}
+		}*/
 		
 		
-		/*menowX = mouseX;
-		menowY = mouseY;*/
+		menowX = mouseX;
+		menowY = mouseY;
 		
 		
 		//Checking when the player is moving
@@ -477,19 +500,26 @@ public class Blockr extends PApplet {
 		fill(meC);
 		noStroke();
 		ellipse(mePos.x, mePos.y, 50, 50);
+		fill(0,255,255,10);
+		ellipse(meDir.x, meDir.y, 50, 50);
 		
 		
 		
 		// MAKE SHIELD
 		noFill();
 		
-		//aDist1 = PI/2;
+		aRed1 = 255;
+		aGreen1 = 0;
+		aBlue1 = 0;
+		aDist1 = PI/2;
+		
 		
 		pushMatrix();
 		translate(mePos.x, mePos.y);
 			rotate(PApplet.radians(angleOfShape));
 			
-			strokeWeight(21-((aDist1/PI)*20));
+			shieldStrength = 21-((aDist1/PI)*20);
+			strokeWeight(shieldStrength);
 			stroke(aRed1, aGreen1, aBlue1, aAlpha1);
 			arc(0, 0, 200.0f, 200.0f, PI-aDist1, PI+aDist1);
 			
@@ -510,8 +540,9 @@ public class Blockr extends PApplet {
 		bulletAngle = (degrees(angleIncoming));
 		shieldAngle = degrees(PI-aDist1);
 		
-//		PApplet.println("bulletAngle = " +bulletAngle);
-//		PApplet.println("shieldAngle = " +shieldAngle);
+//		println("bulletAngle = " +bulletAngle);
+//		println("shieldAngle = " +shieldAngle);
+		println (shieldStrength);
 		
 		
 		//PUT ROTATION INFO HERE
@@ -603,7 +634,7 @@ public class Blockr extends PApplet {
 				   
 				}
 	}
-	
+	/*
 	//------------------THIS IS THE FUNCTION GETTING CHANGES IN VALUES FROM THE MIDI CONTROLLER
 	public void controllerChange(int channel, int number, int value){
 		println("+------+");
@@ -664,7 +695,7 @@ public class Blockr extends PApplet {
 			aDist3 = map(value, 127, 0, 0, 50);
 		}
 		*/
-	}
+	//}
 	
 	
 
