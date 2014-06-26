@@ -6,10 +6,10 @@ import java.util.ArrayList;
 import ddf.minim.AudioPlayer;
 import ddf.minim.AudioSample;
 import ddf.minim.Minim;
-import net.beadsproject.beads.core.AudioContext;
-import net.beadsproject.beads.data.Sample;
-import net.beadsproject.beads.ugens.Gain;
-import net.beadsproject.beads.ugens.SamplePlayer;
+//import net.beadsproject.beads.core.AudioContext;
+//import net.beadsproject.beads.data.Sample;
+//import net.beadsproject.beads.ugens.Gain;
+//import net.beadsproject.beads.ugens.SamplePlayer;
 import processing.core.PApplet;
 import processing.core.PImage;
 import processing.core.PVector;
@@ -72,6 +72,7 @@ public class Blockr extends PApplet {
 	float bulletAngle;
 	float shieldAngle;
 	boolean entered = false;
+	boolean ouch = false;
 	
 	int errorMargin = 50;
 	
@@ -94,6 +95,7 @@ public class Blockr extends PApplet {
 	
 	float health;
 	float healthBar;
+	float scoreBar;
 	
 	
 	
@@ -247,6 +249,7 @@ public class Blockr extends PApplet {
 		
 		health = 100.0f;
 		healthBar = 100.0f;
+		scoreBar = 0.0f;
 		
 		
 		// ***Bullet Setup
@@ -342,9 +345,16 @@ public class Blockr extends PApplet {
 		if (dist(mePos.x, mePos.y, bullets[i].bX, bullets[i].bY) < bullets[i].bR/2 + meRad){
 			colliding = true;
 			if (entered){
+				meC = 0;
+				ouch = true;
+				bullets[i].isActive = false;
+				
 				if (health >= 0){
 					health -= 1.0f;
 					healthBar -= 1.0f;
+				} else {
+					health = 0.0f;
+					healthBar = 0.0f;
 				}
 				if(!isPlaying_Hit){
 					int h = (int)random(3);
@@ -359,11 +369,13 @@ public class Blockr extends PApplet {
 						sfx_hit_tre.trigger();
 						break;
 					}
-					isPlaying_Hit = true;
-					
+				isPlaying_Hit = true;
 				}
+			} else {
+				ouch = false;
+				PApplet.println("NOTHURT");
+				meC = 255;
 			}
-			meC = 0;
 		} else {
 			colliding = false;
 			isPlaying_Hit = false;
@@ -377,12 +389,17 @@ public class Blockr extends PApplet {
 		//MAKE BULLET
 		for (int i = 0; i < totalBullets; i++){
 			bullets[i].make();
-			bullets[i].move();
+			//bullets[i].move();
 		//MOVE BULLET
 		//bull.bX +=0.01f;
 		}
 		
-		
+		//CHECK BULLET
+		for (int i = 0; i < totalBullets; i++){
+			if (bullets[i].isActive == false){
+				bullets[i] = new Bullet();
+			}
+		}
 		
 		// ***Shield
 		//----------------------------------
@@ -391,6 +408,7 @@ public class Blockr extends PApplet {
 		strokeWeight(1);
 		stroke(255,255,255,100);
 		rect (mePos.x+100,mePos.y-30, 100, 20);
+		rect(mePos.x+102, mePos.y-20, scoreBar, 5);
 		
 		noStroke();
 		fill (255,255,255,100);
@@ -418,11 +436,21 @@ public class Blockr extends PApplet {
 								PApplet.println("BLOCKED");
 								sfx_absorb.trigger();
 								
+								if (scoreBar < 100.0f){
+									scoreBar += 1.0f;
+								} else {
+									scoreBar = 100.0f;
+								}
+								
+								bullets[i].isActive = false;
 								entered = false;
+								ouch = false;
 							} else {
 								colliding = true;
 								entered = true;
 							}
+							
+							
 						} else{
 							colliding = true;
 							entered = true;
@@ -440,6 +468,7 @@ public class Blockr extends PApplet {
 			//PApplet.println("ENTERED SHIELD");
 			colliding = true;
 			entered = true;
+			//ouch = true;
 			colCheck = 50;
 			}
 		} else {
@@ -514,7 +543,7 @@ public class Blockr extends PApplet {
 		noFill();
 		
 //		aRed1 = 255;
-//		aGreen1 = 0;
+//		aGreen1 = 100;
 //		aBlue1 = 0;
 //		aDist1 = PI/2;
 		
@@ -566,12 +595,17 @@ public class Blockr extends PApplet {
 		
 		
 		
-		
 		// ***Juice
-		//-------------------------
-						
-		fill (jRed, jGreen, jBlue);
-		noStroke();
+		//-----------------------------
+		if (ouch == true){
+	  		jRed = 255;
+	  		jGreen = 0;
+	  		jBlue = 0;
+	  	} else if (ouch == false){
+	  		jRed = random (100, 200);
+			jGreen = random (100, 200);
+			jBlue = random (100, 200);
+	  	}
 						
 						
 		if (colliding == true) {
@@ -593,6 +627,8 @@ public class Blockr extends PApplet {
 			  	translate(-jCenterX, -jCenterY);
 						 
 			  	for (int i = 0; i < 100; i++) {
+			  		fill (jRed, jGreen, jBlue);
+					noStroke();
 		    		ellipse (jX[i]/4, jY[i]/4, jRad, jRad);
 		    		ellipse (mePos.x-jA[i]/3, mePos.y-jB[i]/3, 5,5);
 			  	}
@@ -624,6 +660,8 @@ public class Blockr extends PApplet {
 					   translate(-jCenterX, -jCenterY);
 						 
 					   for (int i = 0; i < 100; i++) {
+					   		fill (jRed, jGreen, jBlue);
+					   		noStroke();
 						   fill(jRed, jGreen, jBlue, t);
 						   ellipse (jX[i]/3, jY[i]/3, jRad, jRad);
 					   }
@@ -637,21 +675,6 @@ public class Blockr extends PApplet {
 				   //ellipse(mePos.x, mePos.y, r, r);
 				   
 				}
-		
-		sfx_shield.setGain(shieldGain);		
-		
-		if(shieldKnobInput){
-			if(!isLooping_Shield){
-				sfx_shield.loop();
-				isLooping_Shield = true;
-			}
-			sfx_shield.unmute();
-			shieldGain += 3f;
-		}else {
-			shieldGain -= 4f;
-			sfx_shield.mute();
-		}
-		constrain(shieldGain, -8f, -6f);
 	}
 	
 	//------------------THIS IS THE FUNCTION GETTING CHANGES IN VALUES FROM THE MIDI CONTROLLER
@@ -706,12 +729,12 @@ public class Blockr extends PApplet {
 		}
 	}
 	
-	
 //CLASSES
-	
+
 	//Bullet Class
 	class Bullet {
-		float bX = random(-10, width+10);
+		
+		float bX =random(-100, width+100);
 		float bY;
 		
 		// the Bullet Radius
@@ -722,10 +745,10 @@ public class Blockr extends PApplet {
 		float bBlue = random(255);
 		
 		PVector bulletPos;
-		PVector bDir;
+		PVector bDir = new PVector(random(mePos.x-100,mePos.x+100), random(mePos.y-100, mePos.y+100));
 		//float bSpeed;
 		
-
+		boolean isActive = true;
 		
 		float dirX;
 		float dirY;
@@ -740,14 +763,10 @@ public class Blockr extends PApplet {
 		float fluxW = 0;
 		float fluxH = 0.5f*t;
 		
-		float dirRand1x = random(mePos.x-10,mePos.x+10);
-		float dirRand1y = random(mePos.y-10,mePos.y+10);
-		float dirRand2x = random(mePos.x-20,mePos.x+20);
-		float dirRand2y = random(mePos.y-20,mePos.y+20);
-//		float dirRand1x = random(-1,1);
-//		float dirRand1y = random(-1,1);
-//		float dirRand2x = random(-2,2);
-//		float dirRand2y = random(-2,2);
+		float dirRand1x = random(-1,1);
+		float dirRand1y = random(-1,1);
+		float dirRand2x = random(-2,2);
+		float dirRand2y = random(-2,2);
 		float fluxRand1 = random(100,250);
 		float fluxRand2 = random(50,200);
 		float speedRand1 = random(0.5f, 1.0f);
@@ -776,29 +795,10 @@ public class Blockr extends PApplet {
 			
 		}
 		void render(){
-//			int i = (int)random(2);
-//			switch(i) {
-//				case 0:
-//					bX = -10
-//					break;
-//				case 1:
-//					bX = width+10;
-//					break;
-//			}
-//			
-//			int y = (int)random(2);
-//			switch(y) {
-//				case 0:
-//					bY = -10
-//					break;
-//				case 1:
-//					bY = height+10
-//					break;
-//			}
 			
-			if (bX < 0 || bX > width){
+			if (bX <= 0 || bX > width){
 				bY = random(height);
-			} else {
+			} else if (bX > 0 && bX <= width){
 				int y = (int)random(2);
 				switch(y) {
 				case 0:
@@ -810,58 +810,37 @@ public class Blockr extends PApplet {
 				}
 			}
 			
-//			bR = random(5,100);
-//			bRed = (255);
-//			bGreen = (255);
-//			bBlue = (255);
+//				bR = random(5,100);
+//				bRed = (255);
+//				bGreen = (255);
+//				bBlue = (255);
 			
 			
-//			bulletPos = new PVector(bX, bY);
-//			bDir = new PVector(dirX, dirY);
-//			bSpeed = speed;
+//				bulletPos = new PVector(bX, bY);
+//				bDir = new PVector(dirX, dirY);
+//				bSpeed = speed;
 		}
 		
 		void make() {
 			
-			if (bR >= 5 && bR < 10){
-				dirX = mePos.x;
-				dirY = mePos.y;
-				speed = 0.5f;
-			} else if (bR >= 10 && bR < 45){
+			bulletPos = new PVector(bX, bY);
+//				bDir = new PVector(random(mePos.x-100,mePos.x+100), random(mePos.y-100, mePos.y+100));
+			
+			if (bR >= 10 && bR < 20){
+				bX -= (bX-bDir.x)*0.001f;
+				bY -= (bY-bDir.y)*0.001f;
+			} else if (bR >= 20 && bR < 45){
 				bX = fluxRand1*cos(fluxX*t+fluxW+10)+width/2;
 			    bY = fluxRand2*sin(fluxY*t+fluxH-10)+height/2;
 			} else if (bR >=45 && bR < 75){
-				dirX = mePos.x;
-				dirY = mePos.y;
-				speed = speedRand1;
+				bX -= (bX-bDir.x)*0.001f;
+				bY -= (bY-bDir.y)*0.001f;
 			} else if (bR >= 75){
-				dirX = mePos.x;
-				dirY = mePos.y;
-				speed = speedRand2;
+				bX -= (bX-bDir.x)*0.001f;
+				bY -= (bY-bDir.y)*0.001f;
 			}
 			
-			bulletPos = new PVector(bX, bY);
-			bDir = new PVector(dirX, dirY);
-			
-			
-			//println(move);
-			//println(bDir);
-			//println(speed);
-			
-//			fill(bRed, bGreen, bBlue, 100);
-//			noStroke();
-//			ellipse (bX, bY, bR, bR);
-//			ellipse (bX, bY, bR*2, bR*2);
-		}
-		
-		void move(){
 			t += velocity;
-			
-			bDir.sub(bulletPos);
-			
-			bDir = bulletPos;
-			move = PVector.mult(bDir, speed);
-			bulletPos.add(move);
 			
 			fill(bRed, bGreen, bBlue, 100);
 			noStroke();
@@ -869,7 +848,16 @@ public class Blockr extends PApplet {
 			ellipse (bX, bY, bR*2, bR*2);
 			
 			
+			//println(move);
+			//println(bDir);
+			//println(speed);
+			
+//				fill(bRed, bGreen, bBlue, 100);
+//				noStroke();
+//				ellipse (bX, bY, bR, bR);
+//				ellipse (bX, bY, bR*2, bR*2);
 		}
+		
 	}
 	
 	
