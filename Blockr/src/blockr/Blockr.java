@@ -31,6 +31,10 @@ public class Blockr extends PApplet {
 	float continuedX = 0.1f;
 	float continuedY = 0.1f;
 	
+	boolean startGame = false;
+	boolean noGame = true;
+	boolean keyEnter = false;
+	
 	
 	
 	// ***Camera variables
@@ -46,7 +50,6 @@ public class Blockr extends PApplet {
 	PImage bg;
 	ArrayList<PVector> stars = new ArrayList<PVector>();
 	
-	int randStar;
 	float bri = 100.0f;
 	float bridir = random(1,3);
 	
@@ -173,6 +176,8 @@ public class Blockr extends PApplet {
 	
 	AudioPlayer sfx_engine;
 	
+	AudioPlayer theme;
+	
 	float shieldGain = -7f;
 	
 	boolean isPlaying_Shield = false;
@@ -199,7 +204,7 @@ public class Blockr extends PApplet {
 		// ***BG Setup
 		//----------------------------------
 		for (int s = 0; s < 10000; s++) {
-			PVector sP = new PVector((random(5*width))-2.5f*width, (random(5*height))-2.5f*width);
+			PVector sP = new PVector((random(10*width))-5f*width, (random(10*height))-5f*width);
 			stars.add(sP);
 		}
 		
@@ -213,6 +218,8 @@ public class Blockr extends PApplet {
 		
 		
 		minim = new Minim(this);
+		
+		theme = minim.loadFile("data/StarSquare.wav");
 		
 		sfx_engine = minim.loadFile("data/Engine_1.wav");
 		sfx_engine.setGain(-5f);
@@ -235,6 +242,9 @@ public class Blockr extends PApplet {
 		
 		sfx_shieldInv = minim.loadSample("data/Shield_Pad_Inverted.wav");
 		
+		sfx_engine.mute();
+		theme.play();
+		theme.loop();
 		
 		
 		
@@ -294,12 +304,35 @@ public class Blockr extends PApplet {
 		  
 	}
 	public void draw(){
-		background(0);
 		
-		um();
+		if (noGame){
+			pregame();
+			startGame = false;
+			sfx_engine.mute();
+		}
+		
+		if (keyEnter){
+			game();
+			noGame = false;
+			sfx_engine.unmute();
+		}
+	}
+	
+	public void keyPressed(){
+		if (key == RETURN || key == ENTER){
+			println("key");
+			keyEnter = true;
+		} else {
+			keyEnter = false;
+		}
+	}
+	public void pregame(){
+		
+		background(255);
+		
 	}
 
-	public void um() {
+	public void game() {
 		// ***BG
 		//----------------------------------
 		background(0);
@@ -572,7 +605,8 @@ public class Blockr extends PApplet {
 					meStartX = meX;
 					meStartY = meY;
 					
-					menowX = meX;
+					
+					menowX = width-meX;
 					menowY = meY;
 					
 					
