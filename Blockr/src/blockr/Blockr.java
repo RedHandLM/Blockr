@@ -61,6 +61,7 @@ public class Blockr extends PApplet {
 	float aWeight1 = 2;
 	float aAlpha1 = 100;
 	float aDist1 = 0;
+	float paDist1 = 0;
 	float aRotSpeed1;
 	
 	int angleOfShape;
@@ -124,6 +125,7 @@ public class Blockr extends PApplet {
 	// ***MIDI Variables
 	//----------------------------------
 	MidiBus nanoKontrol;
+	boolean shieldKnobInput = false;
 	
 	
 	
@@ -150,22 +152,9 @@ public class Blockr extends PApplet {
 	
 	// ***SOUND VARIABLES
 	//---------------------------------
-	/*
-	AudioContext ac;
-	
-	SamplePlayer engine;
-	SamplePlayer shield;
-	SamplePlayer shield_invert;
-	
-	Gain gEngine;
-	Gain gShield;
-	Gain gShieldInv;
-	
-	String sourceEngine;
-	*/
 	
 	Minim minim;
-	AudioSample sfx_shield;
+	AudioPlayer sfx_shield;
 	AudioSample sfx_shieldInv;
 	AudioSample sfx_absorb;
 	AudioSample sfx_get;
@@ -175,7 +164,10 @@ public class Blockr extends PApplet {
 	
 	AudioPlayer sfx_engine;
 	
-	boolean isPlaying_Absorb = false;
+	float shieldGain = -7f;
+	
+	boolean isPlaying_Shield = false;
+	boolean isLooping_Shield = false;
 	boolean isPlaying_Hit = false;
 
 	public void setup() {
@@ -189,7 +181,7 @@ public class Blockr extends PApplet {
 		
 		MidiBus.list();
 		
-		nanoKontrol = new MidiBus(this, 3, 6);
+		nanoKontrol = new MidiBus(this, 0, 3);
 		
 		
 		// ***BG Setup
@@ -202,21 +194,7 @@ public class Blockr extends PApplet {
 		
 		// ***AudioContext
 		//----------------------------------
-		/*
-		ac = new AudioContext();
 		
-		sourceEngine = sketchPath("")+"data/Engine_1.wav";
-		
-		try {
-			engine = new SamplePlayer(ac, new Sample(sketchPath("")+"data/Engine_1.wav"));
-			shield = new SamplePlayer(ac, new Sample(sketchPath("")+"data/Shield_Pad.wav"));
-			shield_invert = new SamplePlayer(ac, new Sample(sketchPath("")+"data/Shield_Pad_Inverted.wav"));
-		} catch (IOException e) {
-			println("COULDN'T LOAD AUDIO FILE");
-			e.printStackTrace();
-			exit();
-		}
-		*/
 		
 		minim = new Minim(this);
 		
@@ -225,17 +203,20 @@ public class Blockr extends PApplet {
 		sfx_engine.loop();
 		
 		sfx_absorb = minim.loadSample("data/Absorb_1.wav"); //Absorb is when the shield deflects the missiles
+		sfx_absorb.setGain(-7f);
 		
 		sfx_get = minim.loadSample("data/Get_1.wav"); //Get is when the ship gets bonuses
 		
 		sfx_hit_lo = minim.loadSample("data/Hit_1_Lo.wav"); //Hit is when the ship is hit
-		sfx_hit_lo.setGain(-2f);
+		sfx_hit_lo.setGain(-7f);
 		sfx_hit_mid = minim.loadSample("data/Hit_1_Mid.wav");
-		sfx_hit_mid.setGain(-2f);
+		sfx_hit_mid.setGain(-7f);
 		sfx_hit_tre = minim.loadSample("data/Hit_1_Tre.wav");
-		sfx_hit_tre.setGain(-2f);
+		sfx_hit_tre.setGain(-7f);
 		
-		sfx_shield = minim.loadSample("data/Shield_Pad.wav"); //Shield is when the shield is increased/decreased
+		sfx_shield = minim.loadFile("data/Shield_Pad_2.wav"); //Shield is when the shield is increased/decreased
+		
+		
 		sfx_shieldInv = minim.loadSample("data/Shield_Pad_Inverted.wav");
 		
 		
@@ -361,7 +342,6 @@ public class Blockr extends PApplet {
 		if (dist(mePos.x, mePos.y, bullets[i].bX, bullets[i].bY) < bullets[i].bR/2 + meRad){
 			colliding = true;
 			if (entered){
-				PApplet.println("HURT");
 				if (health >= 0){
 					health -= 1.0f;
 					healthBar -= 1.0f;
@@ -570,7 +550,7 @@ public class Blockr extends PApplet {
 		
 		
 		//PUT ROTATION INFO HERE
-		//angleOfShape +=aRotSpeed1;
+		angleOfShape +=aRotSpeed1;
 		
 		/*
 		strokeWeight(aWeight2);
@@ -656,6 +636,23 @@ public class Blockr extends PApplet {
 				   //ellipse(mePos.x, mePos.y, r, r);
 				   
 				}
+		
+		sfx_shield.setGain(shieldGain);
+		println(shieldKnobInput);
+		
+		
+		if(shieldKnobInput){
+			if(!isLooping_Shield){
+				sfx_shield.loop();
+				isLooping_Shield = true;
+			}
+			sfx_shield.unmute();
+			shieldGain += 3f;
+		}else {
+			shieldGain -= 4f;
+			sfx_shield.mute();
+		}
+		constrain(shieldGain, -8f, -6f);
 	}
 	
 	//------------------THIS IS THE FUNCTION GETTING CHANGES IN VALUES FROM THE MIDI CONTROLLER
@@ -668,56 +665,35 @@ public class Blockr extends PApplet {
 		//-------------------FIRST ARC
 		if(number==33){//first fader - RED
 			aRed1 = map(value, 0, 127, 0, 255);
+			shieldKnobInput = false;
 		}else if(number == 34){//second fader - GREEN
 			aGreen1 = map(value, 0, 127, 0, 255);
+			shieldKnobInput = false;
 		}else if(number == 35){//third fader - BLUE
 			aBlue1 = map(value, 0, 127, 0, 255);
+			shieldKnobInput = false;
 		}else if(number==17){//first knob
 			aRotSpeed1 = map(value, 127, 0, -9.0f, 9.0f); 
+			shieldKnobInput = false;
 		}else if(number==18){//second knob
 			aAlpha1 = map(value, 127, 0, 100, 255);
+			shieldKnobInput = false;
 		}
 		if(number == 19){// third knob - SHIELD
-			aDist1 = map(value, 127f, 0f, PI, 0f);
-			if(!isPlaying_Absorb){
-				sfx_shield.trigger();
-				isPlaying_Absorb = true;
+			paDist1 = aDist1;
+			aDist1 = map(value, 0, 127, PI, 0f);
+			shieldKnobInput = true;
+			
+			/*
+			if(abs(aDist1-paDist1) > 0.025){
+				shieldKnobInput = true;
+			}else if(value == 127 && value == 0){
+				shieldKnobInput = false;
+			}else{
+				shieldKnobInput = false;
 			}
-		}else{
-			sfx_shield.stop();
-			isPlaying_Absorb = false;
+			*/
 		}
-		/*
-		//-------------------SECOND ARC
-		if(number==36){//first fader
-			aRed2 = map(value, 0, 127, 0, 255);
-		}else if(number == 37){//second fader
-			aGreen2 = map(value, 0, 127, 0, 255);
-		}else if(number == 38){//third fader
-			aBlue2 = map(value, 0, 127, 0, 255);
-		}else if(number==20){//first knob
-			aWeight2 = map(value, 127, 0, 1, 30); 
-		}else if(number==21){//second knob
-			aAlpha2 = map(value, 127, 0, 100, 255);
-		}else if(number == 22){
-			aDist2 = map(value, 127, 0, 0, 50);
-		}
-		
-		//-------------------THIRD ARC
-		if(number==39){//first fader
-			aRed3 = map(value, 0, 127, 0, 255);
-		}else if(number == 40){//second fader
-			aGreen3 = map(value, 0, 127, 0, 255);
-		}else if(number == 41){//third fader
-			aBlue3 = map(value, 0, 127, 0, 255);
-		}else if(number==23){//first knob
-			aWeight3 = map(value, 127, 0, 1, 30); 
-		}else if(number==24){//second knob
-			aAlpha3 = map(value, 127, 0, 100, 255);
-		}else if(number == 25){
-			aDist3 = map(value, 127, 0, 0, 50);
-		}
-		*/
 	}
 	
 	
