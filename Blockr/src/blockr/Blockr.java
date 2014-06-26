@@ -561,10 +561,10 @@ public class Blockr extends PApplet {
 		// MAKE SHIELD
 		noFill();
 		
-		aRed1 = 255;
-		aGreen1 = 100;
-		aBlue1 = 0;
-		aDist1 = PI/2;
+//		aRed1 = 255;
+//		aGreen1 = 100;
+//		aBlue1 = 0;
+//		aDist1 = PI/2;
 		
 		
 		pushMatrix();
