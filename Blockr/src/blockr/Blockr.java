@@ -69,6 +69,7 @@ public class Blockr extends PApplet {
 	
 	int angleOfShape;
 	
+	
 	//Collision Stuff
 	float shieldRad = 200.0f;
 	int colCheck;
@@ -320,7 +321,22 @@ public class Blockr extends PApplet {
 		}
 		
 		for (int i = 0; i < totalNovas; i++){
+			
 			novas[i].display();
+			
+			PVector sM = new PVector((mePos.x-meDir.x)/800, (mePos.y-meDir.y)/800);
+			
+			if (mePos.x > width/2){
+				novas[i].origX -= sM.x;
+			} else if (mePos.x < width/2){
+				novas[i].origX += sM.x;
+			}
+			
+			if (mePos.y < height/2){
+				novas[i].origY += sM.y;
+			}else if (mePos.y > height/2){
+				novas[i].origY -= sM.y;
+			}
 		}
 		
 		
@@ -415,21 +431,23 @@ public class Blockr extends PApplet {
 		// ***Shield
 		//----------------------------------
 		//CHECK SHIELD COLLISION
+		int offsetX = 15;
+		int offsetY = 40;
 		fill(255);
 		textSize(10);
-		text("H E A L T H", mePos.x+103, mePos.y-34);
-		text("P O I N T S", mePos.x+148, mePos.y+2);
+		text("H E A L T H", mePos.x+103-offsetX, mePos.y-34+offsetY);
+		text("P O I N T S", mePos.x+148-offsetX, mePos.y+2+offsetY);
 		noFill();
 		strokeWeight(1);
 		stroke(255,255,255,100);
-		rect (mePos.x+100,mePos.y-30, 105, 20);
-		rect(mePos.x+102, mePos.y-20, scoreBar, 5);
+		rect (mePos.x+100-offsetX,mePos.y-30+offsetY, 105, 20);
+		rect(mePos.x+102-offsetX, mePos.y-20+offsetY, scoreBar, 5);
 		
 		noStroke();
 		fill (255,255,255,100);
-		rect(mePos.x+102, mePos.y-27, healthBar, 5);
+		rect(mePos.x+102-offsetX, mePos.y-27+offsetY, healthBar, 5);
 		
-		fill(colCheck,0);
+		fill(colCheck,80);
 		ellipse(mePos.x, mePos.y, shieldRad, shieldRad);
 		
 		for (int i = 0; i < totalBullets; i++){
@@ -753,7 +771,7 @@ public class Blockr extends PApplet {
 	//Bullet Class
 	class Bullet {
 		
-		float bX =random(-100, width+100);
+		float bX =random(-150, width+150);
 		float bY;
 		
 		// the Bullet Radius
@@ -821,10 +839,10 @@ public class Blockr extends PApplet {
 				int y = (int)random(2);
 				switch(y) {
 				case 0:
-					bY = -10;
+					bY = -150;
 					break;
 				case 1:
-					bY = height+10;
+					bY = height+150;
 					break;
 				}
 			}
@@ -849,8 +867,8 @@ public class Blockr extends PApplet {
 				bX -= (bX-bDir.x)*0.01f;
 				bY -= (bY-bDir.y)*0.01f;
 			} else if (bR >= 20 && bR < 45){
-				bX = fluxRand1*cos(fluxX*t+fluxW+10)+width/2;
-			    bY = fluxRand2*sin(fluxY*t+fluxH-10)+height/2;
+				bX = fluxRand1*cos(fluxX*t+fluxW+20)+width/2;
+			    bY = fluxRand2*sin(fluxY*t+fluxH-20)+height/2;
 			} else if (bR >=45 && bR < 75){
 				bX -= (bX-bDir.x)*0.005f;
 				bY -= (bY-bDir.y)*0.005f;
@@ -882,7 +900,7 @@ public class Blockr extends PApplet {
 	class Star {
 	  float origX = random(2*width)-1*width;
 	  float origY = random(2*height)-1*width;
-	  float v = random(0.001f, 0.005f);
+	  float v = random(0.001f, 0.003f);
 	  float value = random(0,3);
 	  float x1 = 0;
 	  float y1 = 0;
