@@ -3,6 +3,9 @@ package blockr;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import ddf.minim.AudioPlayer;
+import ddf.minim.AudioSample;
+import ddf.minim.Minim;
 import net.beadsproject.beads.core.AudioContext;
 import net.beadsproject.beads.data.Sample;
 import net.beadsproject.beads.ugens.Gain;
@@ -123,6 +126,7 @@ public class Blockr extends PApplet {
 	
 	// ***SOUND VARIABLES
 	//---------------------------------
+	/*
 	AudioContext ac;
 	
 	SamplePlayer engine;
@@ -134,7 +138,21 @@ public class Blockr extends PApplet {
 	Gain gShieldInv;
 	
 	String sourceEngine;
+	*/
 	
+	Minim minim;
+	AudioSample sfx_shield;
+	AudioSample sfx_shieldInv;
+	AudioSample sfx_absorb;
+	AudioSample sfx_get;
+	AudioSample sfx_hit_lo;
+	AudioSample sfx_hit_mid;
+	AudioSample sfx_hit_tre;
+	
+	AudioPlayer sfx_engine;
+	
+	boolean isPlaying_Absorb = false;
+	boolean isPlaying_Hit = false;
 
 	public void setup() {
 		
@@ -163,6 +181,7 @@ public class Blockr extends PApplet {
 		
 		// ***AudioContext
 		//----------------------------------
+		/*
 		ac = new AudioContext();
 		
 		sourceEngine = sketchPath("")+"data/Engine_1.wav";
@@ -176,6 +195,29 @@ public class Blockr extends PApplet {
 			e.printStackTrace();
 			exit();
 		}
+		*/
+		
+		minim = new Minim(this);
+		
+		sfx_engine = minim.loadFile("data/Engine_1.wav");
+		sfx_engine.setGain(-5f);
+		sfx_engine.loop();
+		
+		sfx_absorb = minim.loadSample("data/Absorb_1.wav"); //Absorb is when the shield deflects the missiles
+		
+		sfx_get = minim.loadSample("data/Get_1.wav"); //Get is when the ship gets bonuses
+		
+		sfx_hit_lo = minim.loadSample("data/Hit_1_Lo.wav"); //Hit is when the ship is hit
+		sfx_hit_lo.setGain(-2f);
+		sfx_hit_mid = minim.loadSample("data/Hit_1_Mid.wav");
+		sfx_hit_mid.setGain(-2f);
+		sfx_hit_tre = minim.loadSample("data/Hit_1_Tre.wav");
+		sfx_hit_tre.setGain(-2f);
+		
+		sfx_shield = minim.loadSample("data/Shield_Pad.wav"); //Shield is when the shield is increased/decreased
+		sfx_shieldInv = minim.loadSample("data/Shield_Pad_Inverted.wav");
+		
+		
 		
 		
 		
@@ -291,10 +333,30 @@ public class Blockr extends PApplet {
 				PApplet.println("HURT");
 				health -= 1.0f;
 				healthBar -= 1.0f;
+				if(!isPlaying_Hit){
+					int i = (int)random(3);
+					switch(i) {
+					case 0:
+						sfx_hit_lo.trigger();
+						break;
+					case 1:
+						sfx_hit_mid.trigger();
+						break;
+					case 2:
+						sfx_hit_tre.trigger();
+						break;
+					}
+					isPlaying_Hit = true;
+					
+				}
 			}
 			meC = 0;
 		} else {
 			colliding = false;
+			isPlaying_Hit = false;
+			sfx_hit_lo.stop();
+			sfx_hit_mid.stop();
+			sfx_hit_tre.stop();
 			meC = 255;
 		}
 		
@@ -325,6 +387,7 @@ public class Blockr extends PApplet {
 					&& (bull.bGreen - errorMargin) < aGreen1 || aGreen1 > (bull.bGreen + errorMargin) 
 					&& (bull.bBlue - errorMargin) < aBlue1 || aBlue1 > (bull.bBlue + errorMargin)){
 				PApplet.println("BLOCKED");
+				sfx_absorb.trigger();
 				entered = false;
 			} else {
 				PApplet.println("NOT BLOCKED");
@@ -372,9 +435,25 @@ public class Blockr extends PApplet {
 					
 					menowX = meStartX;
 					menowY = meStartY;
+					
+					
+				}else{
+					//engineMinim.stop();
+				
 				}
 			}
 		}
+		
+		
+		//Checking when the player is moving
+		PVector isMoving = PVector.sub(mePos, meDir);
+		println(move);
+		if(abs(move.x) > 2.3f && abs(move.x) < 2.5f && abs(move.y) > 1.1f && abs(move.y) < 1.3f){
+			sfx_engine.mute();
+		}else {
+			sfx_engine.unmute();			
+		}
+		
 		
 		// MAKE MEEEE
 		fill(meC);
@@ -515,18 +594,26 @@ public class Blockr extends PApplet {
 		println("Value: "+value);
 		
 		//-------------------FIRST ARC
-		if(number==33){//first fader
+		if(number==33){//first fader - RED
 			aRed1 = map(value, 0, 127, 0, 255);
-		}else if(number == 34){//second fader
+		}else if(number == 34){//second fader - GREEN
 			aGreen1 = map(value, 0, 127, 0, 255);
-		}else if(number == 35){//third fader
+		}else if(number == 35){//third fader - BLUE
 			aBlue1 = map(value, 0, 127, 0, 255);
 		}else if(number==17){//first knob
 			aRotSpeed1 = map(value, 127, 0, -9.0f, 9.0f); 
 		}else if(number==18){//second knob
 			aAlpha1 = map(value, 127, 0, 100, 255);
-		}else if(number == 19){
+		}
+		if(number == 19){// third knob - SHIELD
 			aDist1 = map(value, 127f, 0f, PI, 0f);
+			if(!isPlaying_Absorb){
+				sfx_shield.trigger();
+				isPlaying_Absorb = true;
+			}
+		}else{
+			sfx_shield.stop();
+			isPlaying_Absorb = false;
 		}
 		/*
 		//-------------------SECOND ARC
