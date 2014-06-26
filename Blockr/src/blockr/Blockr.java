@@ -403,9 +403,10 @@ public class Blockr extends PApplet {
 		if (dist(mePos.x, mePos.y, bullets[i].bX, bullets[i].bY) < bullets[i].bR + shieldRad/2){
 			
 			//IF ENEMY IS HITTING THE SHIELD OR NOT
-			if (bulletAngle+((bullets[i].bR/PI)*2) >= shieldAngle){
+			if (bulletAngle+((bullets[i].bR/PI)*2) >= shieldAngle-angleOfShape){
 				colCheck = 255;
-				
+				println("TOUCHED THE SHIELD");
+				sfx_get.trigger();
 				//IF SHIELD COLOUR MATCHES ENEMY COLOUR
 				if ((bullets[i].bRed - errorMargin) < aRed1 || aRed1 > (bullets[i].bRed + errorMargin)) {
 					if ((bullets[i].bGreen - errorMargin) < aGreen1 || aGreen1 > (bullets[i].bGreen + errorMargin)){
@@ -637,9 +638,7 @@ public class Blockr extends PApplet {
 				   
 				}
 		
-		sfx_shield.setGain(shieldGain);
-		println(shieldKnobInput);
-		
+		sfx_shield.setGain(shieldGain);		
 		
 		if(shieldKnobInput){
 			if(!isLooping_Shield){
@@ -657,10 +656,13 @@ public class Blockr extends PApplet {
 	
 	//------------------THIS IS THE FUNCTION GETTING CHANGES IN VALUES FROM THE MIDI CONTROLLER
 	public void controllerChange(int channel, int number, int value){
+		
+		/*
 		println("+------+");
 		println("Channel: "+channel);
 		println("Number: "+number);
 		println("Value: "+value);
+		*/
 		
 		//-------------------FIRST ARC
 		if(number==33){//first fader - RED
@@ -683,23 +685,12 @@ public class Blockr extends PApplet {
 			paDist1 = aDist1;
 			aDist1 = map(value, 0, 127, PI, 0f);
 			shieldKnobInput = true;
-			
-			/*
-			if(abs(aDist1-paDist1) > 0.025){
-				shieldKnobInput = true;
-			}else if(value == 127 && value == 0){
-				shieldKnobInput = false;
-			}else{
-				shieldKnobInput = false;
-			}
-			*/
 		}
 	}
 	
 	
 
 	public void mousePressed (){
-		PApplet.println("Mouse Pressed");
 		jCenterX=mePos.x;
 		jCenterY=mePos.y;
 	}
