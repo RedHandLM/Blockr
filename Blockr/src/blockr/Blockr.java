@@ -400,7 +400,7 @@ public class Blockr extends PApplet {
 				}
 			} else {
 				ouch = false;
-				PApplet.println("NOTHURT");
+				println("NOTHURT");
 				meC = 255;
 			}
 		} else {
@@ -452,12 +452,13 @@ public class Blockr extends PApplet {
 		
 		for (int i = 0; i < totalBullets; i++){
 		if (dist(mePos.x, mePos.y, bullets[i].bX, bullets[i].bY) < bullets[i].bR + shieldRad/2){
-			
+			println("TOUCHED THE SHIELD");
 			//IF ENEMY IS HITTING THE SHIELD OR NOT
 			if (bulletAngle+((bullets[i].bR/PI)*2) >= shieldAngle-angleOfShape){
 				colCheck = 255;
-				println("TOUCHED THE SHIELD");
+				println("IS HITTING THE SHIELD");
 				sfx_get.trigger();
+				
 				//IF SHIELD COLOUR MATCHES ENEMY COLOUR
 				if ((bullets[i].bRed - errorMargin) < aRed1 || aRed1 > (bullets[i].bRed + errorMargin)) {
 					if ((bullets[i].bGreen - errorMargin) < aGreen1 || aGreen1 > (bullets[i].bGreen + errorMargin)){
@@ -466,7 +467,7 @@ public class Blockr extends PApplet {
 							//IF SHIELD STRENGTH MATCHES ENEMY SIZE
 							//bullet radius 5 ~ 100 -- shield strength 1 - 21
 							if (bullets[i].bR < shieldStrength*5){
-								PApplet.println("BLOCKED");
+								println("BLOCKED");
 								sfx_absorb.trigger();
 								
 								if (scoreBar < 100.0f){
@@ -479,6 +480,7 @@ public class Blockr extends PApplet {
 								entered = false;
 								ouch = false;
 							} else {
+								println("not strong enough");
 								colliding = true;
 								entered = true;
 								ouch = false;
@@ -486,23 +488,26 @@ public class Blockr extends PApplet {
 							
 							
 						} else{
+							println("blue is not right");
 							colliding = true;
 							entered = true;
 							ouch = false;
 						}
 					} else {
+						println("green is not right");
 						colliding = true;
 						entered = true;
 						ouch = false;
 					}
 				} else {
+					println("red is not right");
 					colliding = true;
 					entered = true;
 					ouch = false;
 				}
 				
 			} else {
-			//PApplet.println("ENTERED SHIELD");
+			//println("ENTERED SHIELD AREA");
 			colliding = true;
 			entered = true;
 			//ouch = true;
@@ -579,10 +584,10 @@ public class Blockr extends PApplet {
 		// MAKE SHIELD
 		noFill();
 		
-//		aRed1 = 255;
-//		aGreen1 = 100;
-//		aBlue1 = 0;
-//		aDist1 = PI/2;
+		aRed1 = 255;
+		aGreen1 = 100;
+		aBlue1 = 0;
+		aDist1 = PI/2;
 		
 		
 		pushMatrix();
