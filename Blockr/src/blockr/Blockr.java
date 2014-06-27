@@ -59,7 +59,7 @@ public class Blockr extends PApplet {
 	float bri = 100.0f;
 	float bridir = random(1,3);
 	
-	int totalNovas = 35;
+	int totalNovas = 20;
 	Star[] novas = new Star[totalNovas];
 
 	
@@ -324,6 +324,7 @@ public class Blockr extends PApplet {
 		}
 		
 		if (End){
+			preGame = false;
 			inGame = false;
 			endGame = true;
 		}
@@ -333,13 +334,13 @@ public class Blockr extends PApplet {
 			image = loadImage("MENU.png");
 			image(image,0,0);
 			sfx_engine.mute();
+			
 		}
 		
 		
 		if (preGame){
 			preGame = true;
 			inGame = false;
-			noGame = false;
 			background(255);
 			image = loadImage("MENU.png");
 			image(image,0,0);
@@ -518,7 +519,7 @@ public class Blockr extends PApplet {
 									scoreBar += 10.0f;
 								} else if (scoreBar >= 100.0f) {
 									scoreBar = 100.0f;
-									End = true;
+									endGame = true;
 								}
 								
 								bullets[i].isActive = false;
@@ -858,7 +859,7 @@ public class Blockr extends PApplet {
 	//Bullet Class
 	class Bullet {
 		
-		float bX =random(-150, width+150);
+		float bX = random(-150, width+150);
 		float bY;
 		
 		// the Bullet Radius
@@ -869,7 +870,7 @@ public class Blockr extends PApplet {
 		float bBlue = random(255);
 		
 		PVector bulletPos;
-		PVector bDir = new PVector(random(mePos.x-100,mePos.x+100), random(mePos.y-100, mePos.y+100));
+		PVector bDir = new PVector(random(menowX-100,menowX+100), random(menowY-100, menowY+100));
 		//float bSpeed;
 		
 		boolean isActive = true;
@@ -882,16 +883,16 @@ public class Blockr extends PApplet {
 		float velocity = 0.003f;
 		
 		//move variables
-		float fluxX = 8;
-		float fluxY = 5*t;
-		float fluxW = 0;
-		float fluxH = 0.5f*t;
+		float fluxX = random(1,8);
+		float fluxY = random(5*t, 10*t);
+		float fluxW = random(0,8);
+		float fluxH = random(0.1f*t, 0.5f*t);
 		
 		float dirRand1x = random(-1,1);
 		float dirRand1y = random(-1,1);
 		float dirRand2x = random(-2,2);
 		float dirRand2y = random(-2,2);
-		float fluxRand1 = random(100,250);
+		float fluxRand1 = random(50,250);
 		float fluxRand2 = random(50,200);
 		float speedRand1 = random(0.5f, 1.0f);
 		float speedRand2 = random(0.5f, 1.0f);
@@ -966,9 +967,11 @@ public class Blockr extends PApplet {
 			
 			t += velocity;
 			
-			fill(bRed, bGreen, bBlue, 100);
+			fill(bRed, bGreen, bBlue, 150);
 			noStroke();
-			ellipse (bX, bY, bR, bR);
+			ellipse (bX, bY, bR+(bR/2), bR+(bR/2));
+			stroke(bRed, bGreen, bBlue);
+			strokeWeight(1);
 			ellipse (bX, bY, bR*2, bR*2);
 			
 			
@@ -985,10 +988,10 @@ public class Blockr extends PApplet {
 	}
 	
 	class Star {
-	  float origX = random(2*width)-1*width;
-	  float origY = random(2*height)-1*width;
-	  float v = random(0.001f, 0.003f);
-	  float value = random(0,3);
+	  float origX = random(2*width)-width;
+	  float origY = random(2*height)-height;
+	  float v = random(0.001f, 0.005f);
+	  float value = random(0,5);
 	  float x1 = 0;
 	  float y1 = 0;
 	  float x2 = 5;
