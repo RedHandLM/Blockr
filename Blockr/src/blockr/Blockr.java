@@ -6,10 +6,6 @@ import java.util.ArrayList;
 import ddf.minim.AudioPlayer;
 import ddf.minim.AudioSample;
 import ddf.minim.Minim;
-//import net.beadsproject.beads.core.AudioContext;
-//import net.beadsproject.beads.data.Sample;
-//import net.beadsproject.beads.ugens.Gain;
-//import net.beadsproject.beads.ugens.SamplePlayer;
 import processing.core.PApplet;
 import processing.core.PImage;
 import processing.core.PVector;
@@ -62,7 +58,8 @@ public class Blockr extends PApplet {
 	int totalNovas = 20;
 	Star[] novas = new Star[totalNovas];
 
-	
+	int totalVortexes = 20;
+	Vortex[] v = new Vortex[totalVortexes];
 	
 	// ***Shield Variables
 	//----------------------------------
@@ -75,8 +72,13 @@ public class Blockr extends PApplet {
 	float aDist1 = 0;
 	float paDist1 = 0;
 	float aRotSpeed1;
+	float aSpeedX = 0;
+	float aSpeedY = 0;
+	float aRotateShip = 0;
 	
 	int angleOfShape;
+	int angleOfShip;
+	
 	
 	
 	//Collision Stuff
@@ -218,6 +220,12 @@ public class Blockr extends PApplet {
 		for (int i = 0; i < totalNovas; i++){
 			novas[i] = new Star();
 		}
+		
+		for(int j = 0; j < totalVortexes; j++){
+			v[j] = new Vortex((int)(random(-width/2, width/2)), (int)(random(-height/2, height/2)), 150, 150, 140, random(0.1f, 0.3f), this);
+		}
+		
+		
 		
 		// ***AudioContext
 		//----------------------------------
@@ -401,6 +409,10 @@ public class Blockr extends PApplet {
 			}
 		}
 		
+		for(int i = 0; i < totalVortexes; i++){
+			v[i].display();
+		}
+		
 		
 		// ***DEBUG
 		//----------------------------------
@@ -422,7 +434,12 @@ public class Blockr extends PApplet {
 		meDir.sub(mePos);
 		//meDir.normalize();
 		PVector move = PVector.mult(meDir, meSpeed);
-		mePos.add(move);
+		mePos.add(new PVector(aSpeedX, aSpeedY));
+		
+		if(mePos.x <= -300) mePos.x += 5;
+		if(mePos.x >= width+300) mePos.x -= 5;
+		if(mePos.y <= 140) mePos.y += 5;
+		if(mePos.y >= height-140) mePos.y -= 5;
 		
 		
 		
@@ -500,14 +517,14 @@ public class Blockr extends PApplet {
 		if (dist(mePos.x, mePos.y, bullets[i].bX, bullets[i].bY) < bullets[i].bR + shieldRad/2){
 			println("TOUCHED THE SHIELD");
 			//IF ENEMY IS HITTING THE SHIELD OR NOT
-			if (bulletAngle+((bullets[i].bR/PI)*2) >= shieldAngle-angleOfShape){
+			if (bulletAngle+((bullets[i].bR/PI)) >= (shieldAngle*2)-angleOfShape){
 				colCheck = 255;
 				println("IS HITTING THE SHIELD");
 				
 				//IF SHIELD COLOUR MATCHES ENEMY COLOUR
-				if ((bullets[i].bRed - errorMargin) > aRed1 && aRed1 < (bullets[i].bRed + errorMargin)) {
-					if ((bullets[i].bGreen - errorMargin) > aGreen1 && aGreen1 < (bullets[i].bGreen + errorMargin)){
-						if ((bullets[i].bBlue - errorMargin) > aBlue1 && aBlue1 < (bullets[i].bBlue + errorMargin)){
+				if ((bullets[i].bRed - errorMargin) > aRed1 || aRed1 < (bullets[i].bRed + errorMargin)) {
+					if ((bullets[i].bGreen - errorMargin) > aGreen1 || aGreen1 < (bullets[i].bGreen + errorMargin)){
+						if ((bullets[i].bBlue - errorMargin) > aBlue1 || aBlue1 < (bullets[i].bBlue + errorMargin)){
 							
 							//IF SHIELD STRENGTH MATCHES ENEMY SIZE
 							//bullet radius 5 ~ 100 -- shield strength 1 - 21
@@ -650,17 +667,18 @@ public class Blockr extends PApplet {
 		
 		
 		// MAKE MEEEE
+		angleOfShip += aRotateShip;
 		fill(meC);
 		noStroke();
 		pushMatrix();
 		translate(mePos.x, mePos.y);
-		imageMode(CORNER);
-		image(esq, -68, -97);
+		rotate(PApplet.radians(angleOfShip));
 		imageMode(CENTER);
-		rotate(PApplet.radians(angleOfShape));
+		image(esq, 0, 45);
+		imageMode(CENTER);
+		
 		image(tri, 0, 0);
 		popMatrix();
-		//ellipse(mePos.x, mePos.y, 50, 50);
 		
 		
 		
@@ -845,6 +863,15 @@ public class Blockr extends PApplet {
 			aDist1 = map(value, 0, 127, PI, 0f);
 			shieldKnobInput = true;
 		}
+		if(number == 22){//fourth knob - POS X
+			aSpeedX = map(value, 127, 0, -15, 15);		
+		}
+		if(number == 23){//fifth knob - POS Y
+			aRotateShip = map(value, 127, 0, -7, 7);	
+		}
+		if(number == 24){
+			aSpeedY = map(value, 0, 127, -15, 10);	
+		}
 	}
 	
 	
@@ -1014,7 +1041,7 @@ public class Blockr extends PApplet {
 	    pushMatrix();
 	    translate(origX, origY);
 	    strokeWeight(1);
-	    stroke(255);
+	    stroke(255, 255, 255, 50+noise(sin(value))*100);
 
 	    rotate(QUARTER_PI+angle);
 	    line(x1, y1, x2, y2);
@@ -1035,22 +1062,24 @@ public class Blockr extends PApplet {
 	    noFill();
 	    for (int i =1; i < 30; i++) {
 	      //ellipse(0, 0, (radius*radius)/i, (radius*radius)/i);
-	    }
-	    ellipse(0, 0, (radius), (1/radius)*20);
+	    }/*
+	    ellipse(0, 0, (radius), (1/(radius+1))*1);
 	    rotate(QUARTER_PI);
-	    ellipse(0, 0, (radius), (1/radius)*20);
+	    ellipse(0, 0, (radius), (1/(radius+1))*1);
 	    rotate(QUARTER_PI);
-	    ellipse(0, 0, (radius), (1/radius)*20);
+	    ellipse(0, 0, (radius), (1/(radius+1))*1);
 	    rotate(QUARTER_PI);
-	    ellipse(0, 0, (radius), (1/radius)*20);
-
-	    x2+=sin(value)/10;
-	    y1+=sin(value)/10;
+	    ellipse(0, 0, (radius), (1/(radius+1))*1);*/
+	    
+	    x2+=sin(value)/15;
+	    y1+=sin(value)/15;
 	    angle += sin(value)/10;
 	    radius += sin(value)/2;
 
+	    
 	    if (x2 > 10) x2--;
 	    if (y1 > 0) y1--;
+	    
 	    if (angle > 0) angle -=0.01;
 
 
@@ -1058,6 +1087,51 @@ public class Blockr extends PApplet {
 	    popMatrix();
 	  }
 	}
+	
+	//CLASS VORTEX
+	class Vortex {
+
+		  float rad = 0.1f;
+		  float count = 0;
+		  float x;
+		  float y;
+		  float r;
+		  float g;
+		  float b;
+		  float radRate;
+		  PApplet pApplet;
+
+		  Vortex(int x, int y, int r, int g, int b, float radRate, PApplet pApplet) {
+		    this.x = x;
+		    this.y = y;
+		    this.r = r;
+		    this.g = g;
+		    this.b = b;
+		    this.radRate = radRate;
+		    this.pApplet = pApplet;
+		  }
+
+		  void display() {
+			pushMatrix();
+		    translate(x, y);
+		    noStroke();
+		    for (int i = 1; i < 21; i++) {
+		      pApplet.fill((float)(r+noise(i)*(i*0.8)), (float)(g+noise(i)*(i*0.8)), (float)(b+noise(i)*(i*0.8)), noise(i)*5);
+		      ellipse(0, 0, rad*(i/2), rad+random(50)+(sin(count)));
+		    } 
+
+		    if (rad > 1){
+		      rad = 1;
+		      count++;
+		    }
+
+		    if (rad < -(abs(radRate)*200)) {
+		      radRate *= -1;
+		    }
+		    rad -= radRate;
+		    popMatrix();
+		  }
+		}
 	
 	public static void main(String _args[]) {
 		PApplet.main(new String[] { blockr.Blockr.class.getName() });
