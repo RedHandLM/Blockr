@@ -90,6 +90,7 @@ public class Blockr extends PApplet {
 	int errorMargin = 50;
 	
 	float shieldStrength;
+	int shieldL = 0;
 	
 	
 	
@@ -118,10 +119,10 @@ public class Blockr extends PApplet {
 	// ***Juice Variables
 	//----------------------------------
 	//Shield Juice
-	float [] jX = new float[100];
-	float [] jY = new float[100];
-	float [] jA = new float[100];
-	float [] jB = new float[100];
+	float [] jX = new float[200];
+	float [] jY = new float[200];
+	float [] jA = new float[200];
+	float [] jB = new float[200];
 	float [] jDOTx = new float[500];
 	float [] jDOTy = new float [500];
 	
@@ -159,7 +160,6 @@ public class Blockr extends PApplet {
 	
 	//DEBUG
 	PVector testPos;
-	int move = 1;
 	float angleIncoming;
 	
 	//TIMER
@@ -505,13 +505,14 @@ public class Blockr extends PApplet {
 				println("IS HITTING THE SHIELD");
 				
 				//IF SHIELD COLOUR MATCHES ENEMY COLOUR
-				if ((bullets[i].bRed - errorMargin) < aRed1 || aRed1 > (bullets[i].bRed + errorMargin)) {
-					if ((bullets[i].bGreen - errorMargin) < aGreen1 || aGreen1 > (bullets[i].bGreen + errorMargin)){
-						if ((bullets[i].bBlue - errorMargin) < aBlue1 || aBlue1 > (bullets[i].bBlue + errorMargin)){
+				if ((bullets[i].bRed - errorMargin) > aRed1 && aRed1 < (bullets[i].bRed + errorMargin)) {
+					if ((bullets[i].bGreen - errorMargin) > aGreen1 && aGreen1 < (bullets[i].bGreen + errorMargin)){
+						if ((bullets[i].bBlue - errorMargin) > aBlue1 && aBlue1 < (bullets[i].bBlue + errorMargin)){
 							
 							//IF SHIELD STRENGTH MATCHES ENEMY SIZE
 							//bullet radius 5 ~ 100 -- shield strength 1 - 21
-							if (bullets[i].bR < shieldStrength*5){
+							if (bullets[i].bLevel <= shieldL){
+								//bullets[i].bR < shieldStrength*5){
 								println("BLOCKED");
 								sfx_absorb.trigger();
 								
@@ -680,6 +681,16 @@ public class Blockr extends PApplet {
 			strokeWeight(shieldStrength);
 			stroke(aRed1, aGreen1, aBlue1, aAlpha1);
 			arc(0, 0, 200.0f, 200.0f, PI-aDist1, PI+aDist1);
+			
+			if (shieldStrength >= 0 && shieldStrength < 5){
+				shieldL = 1;
+			} else if (shieldStrength < 10){
+				shieldL = 2;
+			} else if (shieldStrength < 15){
+				shieldL = 3;
+			} else if (shieldStrength < 22){
+				shieldL = 4;
+			}
 			
 		popMatrix();
 		pushMatrix();
@@ -879,8 +890,8 @@ public class Blockr extends PApplet {
 		float dirY;
 		float speed;
 		
-		float t = 5;
-		float velocity = 0.003f;
+		float t = 3;
+		float velocity = 0.001f;
 		
 		//move variables
 		float fluxX = random(1,8);
@@ -898,6 +909,8 @@ public class Blockr extends PApplet {
 		float speedRand2 = random(0.5f, 1.0f);
 		
 		PVector move;
+		
+		int bLevel = 0;
 		
 		
 		
@@ -934,35 +947,29 @@ public class Blockr extends PApplet {
 					break;
 				}
 			}
-			
-//				bR = random(5,100);
-//				bRed = (255);
-//				bGreen = (255);
-//				bBlue = (255);
-			
-			
-//				bulletPos = new PVector(bX, bY);
-//				bDir = new PVector(dirX, dirY);
-//				bSpeed = speed;
 		}
 		
 		void make() {
 			
 			bulletPos = new PVector(bX, bY);
-//				bDir = new PVector(random(mePos.x-100,mePos.x+100), random(mePos.y-100, mePos.y+100));
+//			bDir = new PVector(random(mePos.x-100,mePos.x+100), random(mePos.y-100, mePos.y+100));
 			
 			if (bR >= 10 && bR < 20){
 				bX -= (bX-bDir.x)*0.01f;
 				bY -= (bY-bDir.y)*0.01f;
+				bLevel = 1;
 			} else if (bR >= 20 && bR < 45){
 				bX = fluxRand1*cos(fluxX*t+fluxW+20)+width/2;
 			    bY = fluxRand2*sin(fluxY*t+fluxH-20)+height/2;
+			    bLevel = 2;
 			} else if (bR >=45 && bR < 75){
 				bX -= (bX-bDir.x)*0.005f;
 				bY -= (bY-bDir.y)*0.005f;
+				bLevel = 3;
 			} else if (bR >= 75){
 				bX -= (bX-bDir.x)*0.003f;
 				bY -= (bY-bDir.y)*0.003f;
+				bLevel = 4;
 			}
 			
 			t += velocity;
