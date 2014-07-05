@@ -233,7 +233,7 @@ public class Blockr extends PApplet {
 		
 		minim = new Minim(this);
 		
-		theme = minim.loadFile("data/StarSquare.wav");
+		theme = minim.loadFile("data/StarSquare_Mono.wav");
 		
 		sfx_engine = minim.loadFile("data/Engine_1.wav");
 		sfx_engine.setGain(-5f);
