@@ -36,8 +36,6 @@ public class Blockr extends PApplet {
 	static boolean preGame = true;
 	
 	public PImage image;
-	public PImage imageWin;
-	public PImage imageLoss;
 	
 	
 	
@@ -206,12 +204,8 @@ public class Blockr extends PApplet {
 		
 		MidiBus.list();
 		
-		nanoKontrol = new MidiBus(this, "nanoKONTROL", "nanoKONTROL");
+		nanoKontrol = new MidiBus(this, 0, 3);
 		
-		
-		//load the different images for win and loss here
-		//imageWin = loadImage("imageWin.png");
-		//imageLoss = loagImage("imageLoss.png");
 		
 		// ***BG Setup
 		//----------------------------------
@@ -345,8 +339,7 @@ public class Blockr extends PApplet {
 		
 		if (endGame){
 			imageMode(CORNER);
-			if(health <= 0) image = imageLoss;
-			if(scoreBar >= 100.f) image = imageWin;
+			image = loadImage("MENU.png");
 			image.resize(displayWidth, displayHeight);
 			image(image,0,0);
 			sfx_engine.mute();
@@ -798,14 +791,6 @@ public class Blockr extends PApplet {
 		}
 	}
 	
-	public void noteOn(int channel, int pitch, int velocity){
-		println("+------+");
-		println("Channel: "+channel);
-		println("pitch: "+pitch);
-		println("vel: "+velocity);
-	
-	}
-	
 	//------------------THIS IS THE FUNCTION GETTING CHANGES IN VALUES FROM THE MIDI CONTROLLER
 	public void controllerChange(int channel, int number, int value){
 		
@@ -815,50 +800,36 @@ public class Blockr extends PApplet {
 		println("Number: "+number);
 		println("Value: "+value);
 		
-		if(number==117){ //this is for the play button
-			keyEnter = true;
-		}
-		
-		if(number == 116){ //this is for the stop button
-			exit(); //quit application
-		}
-		
-		if(number == 113){
-			if(End){
-				setup();//that looks sketchy as fuck
-			}
-		}
-		
 		
 		//-------------------FIRST ARC
-		if(number==33){//first fader - RED
+		if(number==8){//first fader - RED
 			aRed1 = map(value, 0, 127, 0, 255);
 			shieldKnobInput = false;
-		}else if(number == 34){//second fader - GREEN
+		}else if(number == 9){//second fader - GREEN
 			aGreen1 = map(value, 0, 127, 0, 255);
 			shieldKnobInput = false;
-		}else if(number == 35){//third fader - BLUE
+		}else if(number == 10){//third fader - BLUE
 			aBlue1 = map(value, 0, 127, 0, 255);
 			shieldKnobInput = false;
-		}else if(number==19){//first knob
+		}else if(number==13){//first knob
 			aRotSpeed1 = map(value, 127, 0, -9.0f, 9.0f); 
 			shieldKnobInput = false;
 		}else if(number==22){//second knob
-			//aAlpha1 = map(value, 127, 0, 100, 255);
+			aAlpha1 = map(value, 127, 0, 100, 255);
 			shieldKnobInput = false;
 		}
-		if(number == 17){// third knob - SHIELD
+		if(number == 14){// third knob - SHIELD
 			paDist1 = aDist1;
 			aDist1 = map(value, 0, 127, PI, 0f);
 			shieldKnobInput = true;
 		}
-		if(number == 22){//fourth knob - POS X
+		if(number == 15){//fourth knob - POS X
 			aSpeedX = map(value, 127, 0, -15, 15);		
 		}
 		if(number == 23){//fifth knob - POS Y
 		//	aRotateShip = map(value, 127, 0, -7, 7);	
 		}
-		if(number == 24){
+		if(number == 16){
 			aSpeedY = map(value, 0, 127, -15, 10);	
 		}
 	}
