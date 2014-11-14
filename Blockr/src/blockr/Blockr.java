@@ -121,10 +121,10 @@ public class Blockr extends PApplet {
 	// ***Juice Variables
 	//----------------------------------
 	//Shield Juice
-	float [] jX = new float[200];
-	float [] jY = new float[200];
-	float [] jA = new float[200];
-	float [] jB = new float[200];
+	float [] jX = new float[100];
+	float [] jY = new float[100];
+	float [] jA = new float[100];
+	float [] jB = new float[100];
 	float [] jDOTx = new float[500];
 	float [] jDOTy = new float [500];
 	
@@ -161,8 +161,8 @@ public class Blockr extends PApplet {
 	
 	
 	//DEBUG
-	PVector testPos;
-	float angleIncoming;
+	PVector testPos[] = new PVector[totalBullets];
+	float angleIncoming[] = new float[totalBullets];
 	
 	//TIMER
 	
@@ -372,19 +372,24 @@ public class Blockr extends PApplet {
 		fill(255);
 		
 		for (int i = 0; i < stars.size(); i++){
+			int displace = 800;
 			PVector sP = stars.get(i);
-			PVector sM = new PVector((mePos.x-meDir.x)/800, (mePos.y-meDir.y)/800);
+			PVector sM = new PVector((mePos.x-meDir.x)/displace, (mePos.y-meDir.y)/displace);
 			
-			if (mePos.x > width/2){
+			if (mePos.x > (width/2+150)){
 				sP.x -= sM.x;
-			} else if (mePos.x < width/2){
+				displace --;
+			} else if (mePos.x < (width/2-150)){
 				sP.x += sM.x;
+				displace ++;
 			}
 			
-			if (mePos.y < height/2){
+			if (mePos.y < (height/2 - 100)){
 				sP.y += sM.y;
-			}else if (mePos.y > height/2){
+				displace  --;
+			}else if (mePos.y > (height/2 + 100)){
 				sP.y -= sM.y;
+				displace++;
 			}
 			
 			float d = dist(sP.x, sP.y, width/2, height/2);
@@ -421,6 +426,7 @@ public class Blockr extends PApplet {
 		for(int i = 0; i < totalVortexes; i++){
 			v[i].display();
 		}
+
 		
 		
 		// ***DEBUG
@@ -428,7 +434,7 @@ public class Blockr extends PApplet {
 		for (int i = 0; i < totalBullets; i++){
 		pushMatrix();
 		translate(mePos.x, mePos.y);
-			testPos = new PVector(bullets[i].bX-mePos.x, bullets[i].bY-mePos.y);
+			testPos[i] = new PVector(bullets[i].bX-mePos.x, bullets[i].bY-mePos.y);
 			//stroke(0, 0, 255, 255);
 			//strokeWeight(100);
 			//point(testPos.x, testPos.y);
@@ -449,6 +455,7 @@ public class Blockr extends PApplet {
 		if(mePos.x >= width+300) mePos.x -= 5;
 		if(mePos.y <= 140) mePos.y += 5;
 		if(mePos.y >= height-140) mePos.y -= 5;
+
 		
 		
 		
@@ -459,14 +466,12 @@ public class Blockr extends PApplet {
 		if (dist(mePos.x, mePos.y, bullets[i].bX, bullets[i].bY) < bullets[i].bR/2 + meRad){
 			colliding = true;
 			if (entered){
-				meC = 0;
 				ouch = true;
 				bullets[i].isActive = false;
 				sfx_triggerHit = true;
-				
 				if (health > 0){
-					health -= 10.0f;
-					healthBar -= 10.0f;
+					health -= 5.0f;
+					healthBar -= 5.0f;
 				} else if (health <= 0){
 					End = true;
 					health = 0.0f;
@@ -474,14 +479,13 @@ public class Blockr extends PApplet {
 				}
 				
 			} else {
-				ouch = false;
+				ouch = true;
 				println("NOTHURT");
-				meC = 255;
 				sfx_triggerHit = false;
 			}
 		} else {
 			colliding = false;
-			meC = 255;
+			ouch = false;
 		}
 		}
 		
@@ -519,16 +523,23 @@ public class Blockr extends PApplet {
 		fill (255,255,255,100);
 		rect(mePos.x+102-offsetX, mePos.y-27+offsetY, healthBar, 5);
 		
-		fill(colCheck,80);
+		fill(colCheck,50);
 		ellipse(mePos.x, mePos.y, shieldRad, shieldRad);
 		
 		for (int i = 0; i < totalBullets; i++){
 		if (dist(mePos.x, mePos.y, bullets[i].bX, bullets[i].bY) < bullets[i].bR + shieldRad/2){
-			println("TOUCHED THE SHIELD");
 			//IF ENEMY IS HITTING THE SHIELD OR NOT
-			if (bulletAngle+((bullets[i].bR/PI)) >= (shieldAngle*2)-angleOfShape){
+			fill(255);
+			
+			//
+			//DEBUGGING THE ANGLE INCOMING OF EACH BULLET:
+			text(degrees(angleIncoming[i]), mePos.x+100,mePos.y+100);
+			//
+			
+//			if ((degrees(angleIncoming[i])) >= shieldAngle)
+			if (bullets[i].bY > mePos.y && (degrees(angleIncoming[i])) <= shieldAngle-angleOfShape){
 				colCheck = 255;
-				println("IS HITTING THE SHIELD");
+				println("IS HITTING BOTTOM SHIELD");
 				
 				//IF SHIELD COLOUR MATCHES ENEMY COLOUR
 				if ((bullets[i].bRed - errorMargin) > aRed1 || aRed1 < (bullets[i].bRed + errorMargin)) {
@@ -539,21 +550,21 @@ public class Blockr extends PApplet {
 							//bullet radius 5 ~ 100 -- shield strength 1 - 21
 							if (bullets[i].bLevel <= shieldL){
 								//bullets[i].bR < shieldStrength*5){
-								println("BLOCKED");
+								//println("BLOCKED");
 								sfx_absorb.trigger();
 								
 								if (scoreBar < 100.0f){
 									scoreBar += 10.0f;
 								} else if (scoreBar >= 100.0f) {
 									scoreBar = 100.0f;
-									endGame = true;
+									End = true;
 								}
 								
 								bullets[i].isActive = false;
 								entered = false;
 								ouch = false;
 							} else {
-								println("not strong enough");
+								//println("not strong enough");
 								colliding = true;
 								entered = true;
 								ouch = false;
@@ -562,33 +573,90 @@ public class Blockr extends PApplet {
 							
 							
 						} else{
-							println("blue is not right");
+							//println("blue is not right");
 							colliding = true;
 							entered = true;
 							ouch = false;
 						}
 					} else {
-						println("green is not right");
+						//println("green is not right");
 						colliding = true;
 						entered = true;
 						ouch = false;
 					}
 				} else {
-					println("red is not right");
+					//println("red is not right");
 					colliding = true;
 					entered = true;
 					ouch = false;
 				}
 				
-			} else {
+			}
+			
+			if (bullets[i].bY < mePos.y && (degrees(angleIncoming[i]))-180 <= shieldAngle-angleOfShape) {
+				colCheck = 255;
+				println("IS HITTING TOP SHIELD");
+				
+				//IF SHIELD COLOUR MATCHES ENEMY COLOUR
+				if ((bullets[i].bRed - errorMargin) > aRed1 || aRed1 < (bullets[i].bRed + errorMargin)) {
+					if ((bullets[i].bGreen - errorMargin) > aGreen1 || aGreen1 < (bullets[i].bGreen + errorMargin)){
+						if ((bullets[i].bBlue - errorMargin) > aBlue1 || aBlue1 < (bullets[i].bBlue + errorMargin)){
+							
+							//IF SHIELD STRENGTH MATCHES ENEMY SIZE
+							//bullet radius 5 ~ 100 -- shield strength 1 - 21
+							if (bullets[i].bLevel <= shieldL){
+								//bullets[i].bR < shieldStrength*5){
+								//println("BLOCKED");
+								sfx_absorb.trigger();
+								
+								if (scoreBar < 100.0f){
+									scoreBar += 10.0f;
+								} else if (scoreBar >= 100.0f) {
+									scoreBar = 100.0f;
+									End = true;
+								}
+								
+								bullets[i].isActive = false;
+								entered = false;
+								ouch = false;
+							} else {
+								//println("not strong enough");
+								colliding = true;
+								entered = true;
+								ouch = false;
+								sfx_triggerAbsorb = false;
+							}
+							
+							
+						} else{
+							//println("blue is not right");
+							colliding = true;
+							entered = true;
+							ouch = false;
+						}
+					} else {
+						//println("green is not right");
+						colliding = true;
+						entered = true;
+						ouch = false;
+					}
+				} else {
+					//println("red is not right");
+					colliding = true;
+					entered = true;
+					ouch = false;
+				}
+			}
+			else {
 			//println("ENTERED SHIELD AREA");
 			colliding = true;
+			ouch = false;
 			entered = true;
-			//ouch = true;
-			colCheck = 50;
+			colCheck = 10;
 			}
 		} else {
-			colCheck = 10;	
+			ouch = false;
+			colCheck = 0;	
 		}
 		}
 		
@@ -635,15 +703,20 @@ public class Blockr extends PApplet {
 		
 		// MAKE MEEEE
 		angleOfShip += aRotateShip;
-		fill(meC);
 		noStroke();
 		pushMatrix();
 		translate(mePos.x, mePos.y);
+		if (ouch){
+			tint(255, 0, 0);
+		} else if (!ouch){
+			noTint();
+		}
 		rotate(PApplet.radians(angleOfShip));
+		noTint();
 		imageMode(CENTER);
 		image(esq, 0, 45);
 		imageMode(CENTER);
-		
+
 		image(tri, 0, 0);
 		popMatrix();
 		
@@ -676,31 +749,34 @@ public class Blockr extends PApplet {
 			} else if (shieldStrength < 22){
 				shieldL = 4;
 			}
-			
-		popMatrix();
-		pushMatrix();
-		translate(mePos.x, mePos.y);
-		angleIncoming = PVector.angleBetween(new PVector(testPos.x, testPos.y), new PVector(50, 0));
+			for (int i=0; i < totalBullets; i++){
+				angleIncoming[i] = PVector.angleBetween(new PVector(testPos[i].x, testPos[i].y), new PVector(-50, 0));
+			}
 		popMatrix();
 		
 		//ANGLE TEST
+		for (int i=0; i<totalBullets; i++){
 //		stroke(255, 0, 0, 255);
 //		strokeWeight(2);
-		
-//		line(mePos.x, mePos.y, testPos.x+mePos.x, testPos.y+mePos.y); //line from the origin to the bullet
+//		
+//		line(mePos.x, mePos.y, testPos[i].x+mePos.x, testPos[i].y+mePos.y); //line from the origin to the bullet
 //		stroke(0, 255, 0, 255);
-//		line(mePos.x, mePos.y, mePos.x+50, mePos.y+0); //line from the origin to the reference
+//		line(mePos.x, mePos.y, mePos.x-50, mePos.y+0); //line from the origin to the reference
 		
-		bulletAngle = (degrees(angleIncoming));
+		//bulletAngle = (degrees(angleIncoming[i]));
 		shieldAngle = degrees(PI-aDist1);
+		}
 		
-//		println("bulletAngle = " +bulletAngle);
+		//println("bulletAngle = " +bulletAngle);
 //		println("shieldAngle = " +shieldAngle);
 //		println (shieldStrength);
 		
 		
 		//PUT ROTATION INFO HERE
 		angleOfShape += aRotSpeed1;
+		if (angleOfShape >= 360){
+			angleOfShape = 0;
+		}
 		
 		/*
 		strokeWeight(aWeight2);
@@ -798,37 +874,15 @@ public class Blockr extends PApplet {
 		}
 	}
 	
-	public void noteOn(int channel, int pitch, int velocity){
-		println("+------+");
-		println("Channel: "+channel);
-		println("pitch: "+pitch);
-		println("vel: "+velocity);
-	
-	}
-	
 	//------------------THIS IS THE FUNCTION GETTING CHANGES IN VALUES FROM THE MIDI CONTROLLER
 	public void controllerChange(int channel, int number, int value){
 		
-		
+		/*
 		println("+------+");
 		println("Channel: "+channel);
 		println("Number: "+number);
 		println("Value: "+value);
-		
-		if(number==117){ //this is for the play button
-			keyEnter = true;
-		}
-		
-		if(number == 116){ //this is for the stop button
-			exit(); //quit application
-		}
-		
-		if(number == 113){
-			if(End){
-				setup();//that looks sketchy as fuck
-			}
-		}
-		
+		*/
 		
 		//-------------------FIRST ARC
 		if(number==33){//first fader - RED
@@ -840,14 +894,14 @@ public class Blockr extends PApplet {
 		}else if(number == 35){//third fader - BLUE
 			aBlue1 = map(value, 0, 127, 0, 255);
 			shieldKnobInput = false;
-		}else if(number==19){//first knob
+		}else if(number==17){//first knob
 			aRotSpeed1 = map(value, 127, 0, -9.0f, 9.0f); 
 			shieldKnobInput = false;
-		}else if(number==22){//second knob
-			//aAlpha1 = map(value, 127, 0, 100, 255);
+		}else if(number==18){//second knob
+			aAlpha1 = map(value, 127, 0, 100, 255);
 			shieldKnobInput = false;
 		}
-		if(number == 17){// third knob - SHIELD
+		if(number == 19){// third knob - SHIELD
 			paDist1 = aDist1;
 			aDist1 = map(value, 0, 127, PI, 0f);
 			shieldKnobInput = true;
@@ -856,11 +910,12 @@ public class Blockr extends PApplet {
 			aSpeedX = map(value, 127, 0, -15, 15);		
 		}
 		if(number == 23){//fifth knob - POS Y
-		//	aRotateShip = map(value, 127, 0, -7, 7);	
+			//aRotateShip = map(value, 127, 0, -7, 7);	
 		}
 		if(number == 24){
 			aSpeedY = map(value, 0, 127, -15, 10);	
 		}
+
 	}
 	
 	
@@ -884,131 +939,132 @@ public class Blockr extends PApplet {
 //CLASSES
 
 	//Bullet Class
-	class Bullet {
-		
-		float bX = random(-150, width+150);
-		float bY;
-		
-		// the Bullet Radius
-		float bR = random(5,100);
-		// the Bullet Color
-		float bRed = random(255);
-		float bGreen = random(255);
-		float bBlue = random(255);
-		
-		PVector bulletPos;
-		PVector bDir = new PVector(random(menowX-100,menowX+100), random(menowY-100, menowY+100));
-		//float bSpeed;
-		
-		boolean isActive = true;
-		
-		float dirX;
-		float dirY;
-		float speed;
-		
-		float t = 3;
-		float velocity = 0.001f;
-		
-		//move variables
-		float fluxX = random(1,8);
-		float fluxY = random(5*t, 10*t);
-		float fluxW = random(0,8);
-		float fluxH = random(0.1f*t, 0.5f*t);
-		
-		float dirRand1x = random(-1,1);
-		float dirRand1y = random(-1,1);
-		float dirRand2x = random(-2,2);
-		float dirRand2y = random(-2,2);
-		float fluxRand1 = random(50,250);
-		float fluxRand2 = random(50,200);
-		float speedRand1 = random(0.5f, 1.0f);
-		float speedRand2 = random(0.5f, 1.0f);
-		
-		PVector move;
-		
-		int bLevel = 0;
-		
-		
-		
-		/*Bullet(float xpos, float ypos, float radius, int r, int g, int b, 
-				float dirX, float dirY, float speed){
-			bX = xpos;
-			bY = ypos;
-			bR = radius;
-			bRed = r;
-			bGreen = g;
-			bBlue = b;
+	//Bullet Class
+		class Bullet {
 			
-			bulletPos = new PVector(bX, bY);
-			bDir = new PVector(dirX, dirY);
-			bSpeed = speed;
-		}*/
-		
-		Bullet(){
+			float bX = random(-200, width+200);
+			float bY;
+			
+			// the Bullet Radius
+			float bR = random(5,100);
+			// the Bullet Color
+			float bRed = random(255);
+			float bGreen = random(255);
+			float bBlue = random(255);
+			
+			PVector bulletPos;
+			PVector bDir = new PVector(random(width/2-500,width/2+500), random(height/2-300, height/2+300));
+			//float bSpeed;
+			
+			boolean isActive = true;
+			
+			float dirX;
+			float dirY;
+			float speed;
+			
+			float t = 3;
+			float velocity = 0.001f;
+			
+			//move variables
+			float fluxX = random(1,8);
+			float fluxY = random(5*t, 10*t);
+			float fluxW = random(0,8);
+			float fluxH = random(0.1f*t, 0.5f*t);
+			
+			float dirRand1x = random(-1,1);
+			float dirRand1y = random(-1,1);
+			float dirRand2x = random(-2,2);
+			float dirRand2y = random(-2,2);
+			float fluxRand1 = random(50,250);
+			float fluxRand2 = random(50,200);
+			float speedRand1 = random(0.5f, 1.0f);
+			float speedRand2 = random(0.5f, 1.0f);
+			
+			PVector move;
+			
+			int bLevel = 0;
 			
 			
-		}
-		void render(){
 			
-			if (bX <= 0 || bX > width){
-				bY = random(height);
-			} else if (bX > 0 && bX <= width){
-				int y = (int)random(2);
-				switch(y) {
-				case 0:
-					bY = -150;
-					break;
-				case 1:
-					bY = height+150;
-					break;
+			/*Bullet(float xpos, float ypos, float radius, int r, int g, int b, 
+					float dirX, float dirY, float speed){
+				bX = xpos;
+				bY = ypos;
+				bR = radius;
+				bRed = r;
+				bGreen = g;
+				bBlue = b;
+				
+				bulletPos = new PVector(bX, bY);
+				bDir = new PVector(dirX, dirY);
+				bSpeed = speed;
+			}*/
+			
+			Bullet(){
+				
+				
+			}
+			void render(){
+				
+				if (bX <= 0 || bX > width){
+					bY = random(height);
+				} else if (bX > 0 && bX <= width){
+					int y = (int)random(2);
+					switch(y) {
+					case 0:
+						bY = -150;
+						break;
+					case 1:
+						bY = height+150;
+						break;
+					}
 				}
 			}
-		}
-		
-		void make() {
 			
-			bulletPos = new PVector(bX, bY);
-//			bDir = new PVector(random(mePos.x-100,mePos.x+100), random(mePos.y-100, mePos.y+100));
-			
-			if (bR >= 10 && bR < 20){
-				bX -= (bX-bDir.x)*0.01f;
-				bY -= (bY-bDir.y)*0.01f;
-				bLevel = 1;
-			} else if (bR >= 20 && bR < 45){
-				bX = fluxRand1*cos(fluxX*t+fluxW+20)+width/2;
-			    bY = fluxRand2*sin(fluxY*t+fluxH-20)+height/2;
-			    bLevel = 2;
-			} else if (bR >=45 && bR < 75){
-				bX -= (bX-bDir.x)*0.005f;
-				bY -= (bY-bDir.y)*0.005f;
-				bLevel = 3;
-			} else if (bR >= 75){
-				bX -= (bX-bDir.x)*0.003f;
-				bY -= (bY-bDir.y)*0.003f;
-				bLevel = 4;
+			void make() {
+				
+				bulletPos = new PVector(bX, bY);
+//				bDir = new PVector(random(mePos.x-100,mePos.x+100), random(mePos.y-100, mePos.y+100));
+				
+				if (bR >= 10 && bR < 20){
+					bX -= (bX-bDir.x)*0.01f;
+					bY -= (bY-bDir.y)*0.01f;
+					bLevel = 1;
+				} else if (bR >= 20 && bR < 45){
+					bX = fluxRand1*cos(fluxX*t+fluxW+30)+width/2;
+				    bY = fluxRand2*sin(fluxY*t+fluxH-30)+height/2;
+				    bLevel = 2;
+				} else if (bR >=45 && bR < 75){
+					bX -= (bX-bDir.x)*0.005f;
+					bY -= (bY-bDir.y)*0.005f;
+					bLevel = 3;
+				} else if (bR >= 75){
+					bX -= (bX-bDir.x)*0.003f;
+					bY -= (bY-bDir.y)*0.003f;
+					bLevel = 4;
+				}
+				
+				t += velocity;
+				
+				fill(bRed, bGreen, bBlue, 150);
+				noStroke();
+				ellipse (bX, bY, bR+(bR/2), bR+(bR/2));
+				stroke(bRed, bGreen, bBlue);
+				strokeWeight(1);
+				ellipse (bX, bY, bR*2, bR*2);
+				
+				
+				//println(move);
+				//println(bDir);
+				//println(speed);
+				
+//					fill(bRed, bGreen, bBlue, 100);
+//					noStroke();
+//					ellipse (bX, bY, bR, bR);
+//					ellipse (bX, bY, bR*2, bR*2);
 			}
 			
-			t += velocity;
-			
-			fill(bRed, bGreen, bBlue, 150);
-			noStroke();
-			ellipse (bX, bY, bR+(bR/2), bR+(bR/2));
-			stroke(bRed, bGreen, bBlue);
-			strokeWeight(1);
-			ellipse (bX, bY, bR*2, bR*2);
-			
-			
-			//println(move);
-			//println(bDir);
-			//println(speed);
-			
-//				fill(bRed, bGreen, bBlue, 100);
-//				noStroke();
-//				ellipse (bX, bY, bR, bR);
-//				ellipse (bX, bY, bR*2, bR*2);
 		}
-		
-	}
 	
 	class Star {
 	  float origX = random(2*width)-width;
@@ -1032,6 +1088,7 @@ public class Blockr extends PApplet {
 	    strokeWeight(1);
 	    stroke(255, 255, 255, 50+noise(sin(value))*100);
 
+
 	    rotate(QUARTER_PI+angle);
 	    line(x1, y1, x2, y2);
 	    rotate(QUARTER_PI);
@@ -1052,20 +1109,21 @@ public class Blockr extends PApplet {
 	    for (int i =1; i < 30; i++) {
 	      //ellipse(0, 0, (radius*radius)/i, (radius*radius)/i);
 	    }/*
-	    ellipse(0, 0, (radius), (1/(radius+1))*1);
+	  	ellipse(0, 0, (radius), (1/(radius+1))*1);
 	    rotate(QUARTER_PI);
 	    ellipse(0, 0, (radius), (1/(radius+1))*1);
 	    rotate(QUARTER_PI);
-	    ellipse(0, 0, (radius), (1/(radius+1))*1);
+	  	ellipse(0, 0, (radius), (1/(radius+1))*1);
+
 	    rotate(QUARTER_PI);
-	    ellipse(0, 0, (radius), (1/(radius+1))*1);*/
+	   	ellipse(0, 0, (radius), (1/(radius+1))*1);*/
 	    
 	    x2+=sin(value)/15;
 	    y1+=sin(value)/15;
+
 	    angle += sin(value)/10;
 	    radius += sin(value)/2;
 
-	    
 	    if (x2 > 10) x2--;
 	    if (y1 > 0) y1--;
 	    
@@ -1105,22 +1163,23 @@ public class Blockr extends PApplet {
 		    translate(x, y);
 		    noStroke();
 		    for (int i = 1; i < 21; i++) {
-		      pApplet.fill((float)(r+noise(i)*(i*0.8)), (float)(g+noise(i)*(i*0.8)), (float)(b+noise(i)*(i*0.8)), noise(i)*5);
-		      ellipse(0, 0, rad*(i/2), rad+random(50)+(sin(count)));
-		    } 
+			      pApplet.fill((float)(r+noise(i)*(i*0.8)), (float)(g+noise(i)*(i*0.8)), (float)(b+noise(i)*(i*0.8)), noise(i)*5);
+			      ellipse(0, 0, rad*(i/2), rad+random(50)+(sin(count)));
+			    } 
 
-		    if (rad > 1){
-		      rad = 1;
-		      count++;
-		    }
+			    if (rad > 1){
+			      rad = 0;
+			      count++;
+			    }
 
-		    if (rad < -(abs(radRate)*200)) {
-		      radRate *= -1;
-		    }
-		    rad -= radRate;
-		    popMatrix();
-		  }
-		}
+			    if (rad < -(abs(radRate)*200)) {
+				      radRate *= -1;
+				    }
+				    rad -= radRate;
+				    popMatrix();
+				  }
+				}
+
 	
 	public static void main(String _args[]) {
 		PApplet.main(new String[] { blockr.Blockr.class.getName() });
